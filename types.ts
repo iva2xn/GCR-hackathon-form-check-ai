@@ -1,5 +1,5 @@
 
-export type AppStatus = 'idle' | 'loading' | 'report';
+export type AppStatus = 'idle' | 'loading' | 'report' | 'error';
 
 export interface Point {
   x: number;
@@ -17,8 +17,9 @@ export interface ReportData {
   error: {
     title: string;
     timestamp: string;
-    imageSrc: string; // Placeholder image
+    imageSrc: string; // Placeholder image, will be replaced by data URL
     skeleton: SkeletonData;
+    errorFrameIndex?: number; // Used by AI to specify which frame to show
   };
   findings: {
     errorName: string;
