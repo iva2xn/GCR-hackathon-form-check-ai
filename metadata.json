@@ -1,0 +1,5 @@
+{
+  "name": "FormCheck AI",
+  "description": "An AI-powered application that analyzes exercise form from user-uploaded videos, providing detailed feedback and actionable corrections to improve safety and performance.",
+  "requestFramePermissions": []
+}
