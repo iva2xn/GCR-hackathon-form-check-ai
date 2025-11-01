@@ -1,15 +1,112 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>FormCheck AI</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Geist+Sans:wght@400;500;600;700&family=Geist+Mono&display=swap" rel="stylesheet">
     <style>
-      body {
-        background-color: #111827; /* bg-gray-900 */
+      :root {
+        --background: #ffffff;
+        --foreground: #020817;
+        --card: #ffffff;
+        --card-foreground: #020817;
+        --popover: #ffffff;
+        --popover-foreground: #020817;
+        --primary: #0052ff;
+        --primary-foreground: #ffffff;
+        --secondary: #f1f5f9;
+        --secondary-foreground: #020817;
+        --muted: #f1f5f9;
+        --muted-foreground: #64748b;
+        --accent: #f1f5f9;
+        --accent-foreground: #020817;
+        --destructive: #ef4444;
+        --destructive-foreground: #f8f9fa;
+        --border: #e2e8f0;
+        --input: #e2e8f0;
+        --ring: #0052ff;
+        --chart-1: #0052ff;
+        --chart-2: #2e72ff;
+        --chart-3: #5c91ff;
+        --chart-4: #8aafff;
+        --chart-5: #b8ceff;
+        --sidebar: #f8fafc;
+        --sidebar-foreground: #020817;
+        --sidebar-primary: #0052ff;
+        --sidebar-primary-foreground: #ffffff;
+        --sidebar-accent: #2e72ff;
+        --sidebar-accent-foreground: #ffffff;
+        --sidebar-border: #e2e8f0;
+        --sidebar-ring: #0052ff;
+        --font-sans: 'Geist Sans', sans-serif;
+        --font-serif: Georgia, serif;
+        --font-mono: 'Geist Mono', monospace;
+        --radius: 0.75rem;
+        --shadow-x: 0px;
+        --shadow-y: 2px;
+        --shadow-blur: 4px;
+        --shadow-spread: 0px;
+        --shadow-opacity: 0.1;
+        --shadow-color: #000000;
+        --shadow-2xs: 0px 2px 4px 0px hsl(0 0% 0% / 0.05);
+        --shadow-xs: 0px 2px 4px 0px hsl(0 0% 0% / 0.05);
+        --shadow-sm: 0px 2px 4px 0px hsl(0 0% 0% / 0.10), 0px 1px 2px -1px hsl(0 0% 0% / 0.10);
+        --shadow: 0px 2px 4px 0px hsl(0 0% 0% / 0.10), 0px 1px 2px -1px hsl(0 0% 0% / 0.10);
+        --shadow-md: 0px 2px 4px 0px hsl(0 0% 0% / 0.10), 0px 2px 4px -1px hsl(0 0% 0% / 0.10);
+        --shadow-lg: 0px 2px 4px 0px hsl(0 0% 0% / 0.10), 0px 4px 6px -1px hsl(0 0% 0% / 0.10);
+        --shadow-xl: 0px 2px 4px 0px hsl(0 0% 0% / 0.10), 0px 8px 10px -1px hsl(0 0% 0% / 0.10);
+        --shadow-2xl: 0px 2px 4px 0px hsl(0 0% 0% / 0.25);
+        --tracking-normal: 0rem;
+        --spacing: 0.25rem;
       }
+
+      .dark {
+        --background: #0d1117;
+        --foreground: #e6edf3;
+        --card: #161b22;
+        --card-foreground: #e6edf3;
+        --popover: #161b22;
+        --popover-foreground: #e6edf3;
+        --primary: #0052ff;
+        --primary-foreground: #ffffff;
+        --secondary: #21262d;
+        --secondary-foreground: #e6edf3;
+        --muted: #21262d;
+        --muted-foreground: #8b949e;
+        --accent: #2e72ff;
+        --accent-foreground: #ffffff;
+        --destructive: #da3633;
+        --destructive-foreground: #f8f9fa;
+        --border: #30363d;
+        --input: #21262d;
+        --ring: #0052ff;
+        --chart-1: #0052ff;
+        --chart-2: #2e72ff;
+        --chart-3: #5c91ff;
+        --chart-4: #8aafff;
+        --chart-5: #b8ceff;
+        --sidebar: #0d1117;
+        --sidebar-foreground: #e6edf3;
+        --sidebar-primary: #0052ff;
+        --sidebar-primary-foreground: #ffffff;
+        --sidebar-accent: #2e72ff;
+        --sidebar-accent-foreground: #ffffff;
+        --sidebar-border: #30363d;
+        --sidebar-ring: #0052ff;
+      }
+      
+      body {
+        background-color: var(--background);
+        color: var(--foreground);
+        font-family: var(--font-sans);
+        letter-spacing: var(--tracking-normal);
+      }
+      
       @keyframes fadeIn {
         from { opacity: 0; transform: translateY(8px); }
         to { opacity: 1; transform: translateY(0); }
@@ -18,17 +115,77 @@
         animation: fadeIn 0.5s ease-out forwards;
       }
     </style>
-  <script type="importmap">
-{
-  "imports": {
-    "react/": "https://aistudiocdn.com/react@^19.2.0/",
-    "react": "https://aistudiocdn.com/react@^19.2.0",
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
-    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.28.0"
-  }
-}
-</script>
-</head>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              background: 'var(--background)',
+              foreground: 'var(--foreground)',
+              card: 'var(--card)',
+              'card-foreground': 'var(--card-foreground)',
+              popover: 'var(--popover)',
+              'popover-foreground': 'var(--popover-foreground)',
+              primary: {
+                DEFAULT: 'var(--primary)',
+                foreground: 'var(--primary-foreground)',
+              },
+              secondary: {
+                DEFAULT: 'var(--secondary)',
+                foreground: 'var(--secondary-foreground)',
+              },
+              muted: {
+                DEFAULT: 'var(--muted)',
+                foreground: 'var(--muted-foreground)',
+              },
+              accent: {
+                DEFAULT: 'var(--accent)',
+                foreground: 'var(--accent-foreground)',
+              },
+              destructive: {
+                DEFAULT: 'var(--destructive)',
+                foreground: 'var(--destructive-foreground)',
+              },
+              border: 'var(--border)',
+              input: 'var(--input)',
+              ring: 'var(--ring)',
+            },
+            borderRadius: {
+              lg: 'var(--radius)',
+              md: 'calc(var(--radius) - 2px)',
+              sm: 'calc(var(--radius) - 4px)',
+              xl: 'calc(var(--radius) + 4px)',
+            },
+            fontFamily: {
+              sans: ['var(--font-sans)'],
+              serif: ['var(--font-serif)'],
+              mono: ['var(--font-mono)'],
+            },
+            boxShadow: {
+              '2xs': 'var(--shadow-2xs)',
+              xs: 'var(--shadow-xs)',
+              sm: 'var(--shadow-sm)',
+              DEFAULT: 'var(--shadow)',
+              md: 'var(--shadow-md)',
+              lg: 'var(--shadow-lg)',
+              xl: 'var(--shadow-xl)',
+              '2xl': 'var(--shadow-2xl)',
+            },
+          }
+        }
+      }
+    </script>
+    <script type="importmap">
+      {
+        "imports": {
+          "react/": "https://aistudiocdn.com/react@^19.2.0/",
+          "react": "https://aistudiocdn.com/react@^19.2.0",
+          "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+          "@google/genai": "https://aistudiocdn.com/@google/genai@^1.28.0"
+        }
+      }
+    </script>
+  </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>

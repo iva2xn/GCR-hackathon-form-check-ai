@@ -188,14 +188,14 @@ You must return your response in a JSON format that adheres to the provided sche
         return reportData && <Report data={reportData} onReset={handleReset} />;
       case 'error':
         return (
-          <div className="bg-gray-800 rounded-xl shadow-lg p-6 sm:p-8 text-center">
-            <h2 className="text-2xl sm:text-3xl font-bold text-red-400 mb-4">Analysis Failed</h2>
-            <p className="text-gray-400 mb-6 sm:mb-8 max-w-lg mx-auto whitespace-pre-wrap">
+          <div className="bg-card rounded-xl shadow p-6 sm:p-8 text-center">
+            <h2 className="text-2xl sm:text-3xl font-bold text-destructive mb-4">Analysis Failed</h2>
+            <p className="text-muted-foreground mb-6 sm:mb-8 max-w-lg mx-auto whitespace-pre-wrap">
               {errorMessage}
             </p>
             <button
               onClick={handleReset}
-              className="mt-8 w-full sm:w-auto inline-flex items-center justify-center px-8 py-3 text-lg font-bold text-white bg-cyan-600 rounded-lg shadow-md transition-all duration-300 hover:bg-cyan-500 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-gray-900"
+              className="mt-8 w-full sm:w-auto inline-flex items-center justify-center px-8 py-3 text-lg font-bold text-primary-foreground bg-primary rounded-md shadow-sm transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
             >
               Try Again
             </button>
@@ -214,10 +214,10 @@ You must return your response in a JSON format that adheres to the provided sche
   };
 
   return (
-    <div className="bg-gray-900 text-gray-100 min-h-screen flex flex-col font-sans">
+    <div className="bg-background text-foreground min-h-screen flex flex-col">
       <Header />
       <main className="flex-grow flex items-center justify-center p-4 sm:p-6 md:p-8">
-        <div className="w-full max-w-4xl">
+        <div className="w-full max-w-7xl">
           {renderContent()}
         </div>
       </main>

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import type { ReportData } from '../types';
 import { AlertIcon, CheckIcon, GaugeIcon, InfoIcon, RestartIcon, TrophyIcon } from './icons';
@@ -9,10 +8,10 @@ interface ReportProps {
 }
 
 const ReportCard: React.FC<{ title: string; icon: React.ReactNode; children: React.ReactNode }> = ({ title, icon, children }) => (
-    <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border border-gray-700 shadow-lg">
+    <div className="bg-card rounded-xl p-6 border border-border shadow-sm">
         <div className="flex items-center mb-4">
             {icon}
-            <h3 className="text-xl font-bold ml-3 text-gray-100">{title}</h3>
+            <h3 className="text-xl font-bold ml-3 text-card-foreground">{title}</h3>
         </div>
         {children}
     </div>
@@ -24,38 +23,33 @@ export const Report: React.FC<ReportProps> = ({ data, onReset }) => {
     switch (level) {
       case 'Needs Improvement':
         return {
-          container: 'bg-red-900/20 border border-red-500/50',
-          iconBg: 'bg-red-500/20',
-          iconColor: 'text-red-400',
-          textColor: 'text-red-400',
+          container: 'bg-destructive/10 border-destructive/30 text-destructive',
+          iconBg: 'bg-destructive/10',
+          iconColor: 'text-destructive',
         };
       case 'Good':
         return {
-          container: 'bg-yellow-900/20 border border-yellow-500/50',
-          iconBg: 'bg-yellow-500/20',
+          container: 'bg-yellow-500/10 border-yellow-500/30 text-yellow-300',
+          iconBg: 'bg-yellow-500/10',
           iconColor: 'text-yellow-400',
-          textColor: 'text-yellow-300',
         };
       case 'Excellent':
         return {
-          container: 'bg-green-900/20 border border-green-500/50',
-          iconBg: 'bg-green-500/20',
+          container: 'bg-green-500/10 border-green-500/30 text-green-300',
+          iconBg: 'bg-green-500/10',
           iconColor: 'text-green-400',
-          textColor: 'text-green-300',
         };
       case 'Perfect':
         return {
-          container: 'bg-cyan-900/20 border border-cyan-500/50',
-          iconBg: 'bg-cyan-500/20',
-          iconColor: 'text-cyan-400',
-          textColor: 'text-cyan-300',
+          container: 'bg-primary/10 border-primary/30 text-primary',
+          iconBg: 'bg-primary/10',
+          iconColor: 'text-primary',
         };
       default:
         return {
-          container: 'bg-gray-800 border border-gray-700',
-          iconBg: 'bg-gray-700',
-          iconColor: 'text-gray-400',
-          textColor: 'text-gray-200',
+          container: 'bg-card border-border text-foreground',
+          iconBg: 'bg-muted',
+          iconColor: 'text-muted-foreground',
         };
     }
   };
@@ -65,27 +59,27 @@ export const Report: React.FC<ReportProps> = ({ data, onReset }) => {
   return (
     <div className="w-full mx-auto animate-fade-in">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
-            <h1 className="text-3xl font-bold text-white mb-2 sm:mb-0">{data.title}</h1>
+            <h1 className="text-3xl font-bold text-foreground mb-2 sm:mb-0">{data.title}</h1>
              <button
                 onClick={onReset}
-                className="flex items-center px-4 py-2 text-sm font-medium text-gray-200 bg-gray-700 rounded-lg hover:bg-gray-600 transition-colors duration-200"
+                className="flex items-center px-4 py-2 text-sm font-medium text-secondary-foreground bg-secondary rounded-md hover:bg-secondary/80 transition-colors duration-200 shadow-sm"
                 >
                 <RestartIcon className="w-4 h-4 mr-2" />
                 Analyze Another Video
             </button>
         </div>
 
-        <div className={`rounded-xl p-4 sm:p-5 shadow-lg my-6 flex items-start sm:items-center gap-4 ${ratingStyles.container}`}>
+        <div className={`rounded-lg p-4 sm:p-5 shadow-md my-6 flex items-start sm:items-center gap-4 border ${ratingStyles.container}`}>
             <div className={`p-3 rounded-full ${ratingStyles.iconBg}`}>
                 <GaugeIcon className={`w-8 h-8 ${ratingStyles.iconColor}`} />
             </div>
             <div>
-                <p className="text-sm font-medium text-gray-400">Overall Form Rating</p>
-                <h2 className={`text-2xl font-bold ${ratingStyles.textColor}`}>
+                <p className="text-sm font-medium text-muted-foreground">Overall Form Rating</p>
+                <h2 className="text-2xl font-bold">
                     {data.formRating.level}
-                    <span className="text-gray-400 font-normal text-lg ml-2">({data.formRating.formScore}/100)</span>
+                    <span className="text-muted-foreground font-normal text-lg ml-2">({data.formRating.formScore}/100)</span>
                 </h2>
-                <p className="text-sm text-gray-300 mt-1">{data.formRating.justification}</p>
+                <p className="text-sm text-muted-foreground mt-1">{data.formRating.justification}</p>
             </div>
         </div>
 
@@ -93,40 +87,40 @@ export const Report: React.FC<ReportProps> = ({ data, onReset }) => {
         
         {/* Left Column */}
         <div className="lg:col-span-3 space-y-6">
-            <div className="bg-red-900/20 border border-red-500/50 rounded-xl p-4 sm:p-6 shadow-2xl shadow-red-900/20">
-                <div className="flex items-center text-red-400 mb-3">
+            <div className="bg-card border border-destructive/50 rounded-xl p-4 sm:p-6 shadow-md shadow-destructive/10">
+                <div className="flex items-center text-destructive mb-3">
                     <AlertIcon className="w-7 h-7" />
                     <h2 className="text-2xl font-bold ml-3">{data.error.title}</h2>
-                    <span className="ml-auto text-sm font-mono bg-red-500/20 text-red-300 px-2 py-1 rounded">{data.error.timestamp}</span>
+                    <span className="ml-auto text-sm font-mono bg-destructive/10 text-destructive px-2 py-1 rounded">{data.error.timestamp}</span>
                 </div>
-                <div className="relative rounded-lg overflow-hidden border-2 border-red-500/30">
+                <div className="relative rounded-lg overflow-hidden border-2 border-destructive/30">
                     <img src={data.error.imageSrc} alt="Exercise frame with error" className="w-full h-auto" />
                 </div>
             </div>
 
-            <ReportCard title="Performance Breakdown" icon={<GaugeIcon className="w-6 h-6 text-cyan-400" />}>
+            <ReportCard title="Performance Breakdown" icon={<GaugeIcon className="w-6 h-6 text-primary" />}>
                 <div className="space-y-5">
                     {data.formRating.detailedScores.map((item, index) => (
                         <div key={index}>
                             <div className="flex justify-between items-center mb-1">
-                                <p className="font-semibold text-gray-200">{item.metric}</p>
-                                <p className="font-mono text-lg font-bold text-cyan-300">{item.score}<span className="text-sm font-normal text-gray-500">/10</span></p>
+                                <p className="font-semibold text-foreground">{item.metric}</p>
+                                <p className="font-mono text-lg font-bold text-primary">{item.score}<span className="text-sm font-normal text-muted-foreground">/10</span></p>
                             </div>
-                            <div className="w-full bg-gray-700 rounded-full h-2.5">
-                                <div className="bg-cyan-500 h-2.5 rounded-full" style={{ width: `${item.score * 10}%` }}></div>
+                            <div className="w-full bg-muted rounded-full h-2.5">
+                                <div className="bg-primary h-2.5 rounded-full" style={{ width: `${item.score * 10}%` }}></div>
                             </div>
-                            <p className="text-gray-400 text-xs mt-1.5">{item.justification}</p>
+                            <p className="text-muted-foreground text-xs mt-1.5">{item.justification}</p>
                         </div>
                     ))}
                 </div>
             </ReportCard>
 
-            <ReportCard title="Actionable Correction Plan" icon={<CheckIcon className="w-6 h-6 text-green-400" />}>
+            <ReportCard title="Actionable Correction Plan" icon={<CheckIcon className="w-6 h-6 text-green-500" />}>
                  <div className="space-y-4">
                     {data.correctionPlan.steps.map((step, index) => (
                         <div key={index}>
-                            <p className="font-semibold text-cyan-400">{step.title}</p>
-                            <p className="text-gray-400 text-sm">{step.description}</p>
+                            <p className="font-semibold text-primary">{step.title}</p>
+                            <p className="text-muted-foreground text-sm">{step.description}</p>
                         </div>
                     ))}
                 </div>
@@ -135,36 +129,36 @@ export const Report: React.FC<ReportProps> = ({ data, onReset }) => {
 
         {/* Right Column */}
         <div className="lg:col-span-2 space-y-6">
-            <ReportCard title={data.positiveReinforcement.title} icon={<TrophyIcon className="w-6 h-6 text-cyan-400" />}>
-                <p className="text-gray-300 text-sm">{data.positiveReinforcement.text}</p>
+            <ReportCard title={data.positiveReinforcement.title} icon={<TrophyIcon className="w-6 h-6 text-primary" />}>
+                <p className="text-muted-foreground text-sm">{data.positiveReinforcement.text}</p>
             </ReportCard>
-            <ReportCard title="Specific Findings" icon={<InfoIcon className="w-6 h-6 text-yellow-400" />}>
-                <div className="space-y-4 text-gray-300">
+            <ReportCard title="Specific Findings" icon={<InfoIcon className="w-6 h-6 text-yellow-500" />}>
+                <div className="space-y-4">
                     <div>
-                        <p className="text-sm text-gray-500 font-medium">Error Name</p>
-                        <p className="font-semibold text-red-400">{data.findings.errorName}</p>
+                        <p className="text-sm text-muted-foreground font-medium">Error Name</p>
+                        <p className="font-semibold text-destructive">{data.findings.errorName}</p>
                     </div>
                     <div>
-                        <p className="text-sm text-gray-500 font-medium">Description</p>
-                        <p className="text-sm">{data.findings.description}</p>
+                        <p className="text-sm text-muted-foreground font-medium">Description</p>
+                        <p className="text-sm text-muted-foreground">{data.findings.description}</p>
                     </div>
                      <div>
-                        <p className="text-sm text-gray-500 font-medium">Analysis Confidence</p>
-                        <p className="font-mono text-lg text-green-400">{data.findings.confidence}</p>
+                        <p className="text-sm text-muted-foreground font-medium">Analysis Confidence</p>
+                        <p className="font-mono text-lg text-green-500">{data.findings.confidence}</p>
                     </div>
                     <div>
-                        <p className="text-sm text-gray-500 font-medium">Affected Joints</p>
+                        <p className="text-sm text-muted-foreground font-medium">Affected Joints</p>
                         <div className="flex flex-wrap gap-2 mt-1">
                             {data.findings.affectedJoints.map((joint) => (
-                                <span key={joint} className="text-xs font-medium bg-yellow-500/20 text-yellow-300 px-2 py-1 rounded-full">{joint}</span>
+                                <span key={joint} className="text-xs font-medium bg-yellow-500/10 text-yellow-400 px-2 py-1 rounded-full">{joint}</span>
                             ))}
                         </div>
                     </div>
                 </div>
             </ReportCard>
             
-             <ReportCard title={data.rationale.title} icon={<AlertIcon className="w-6 h-6 text-red-400" />}>
-                <p className="text-gray-400 text-sm">{data.rationale.text}</p>
+             <ReportCard title={data.rationale.title} icon={<AlertIcon className="w-6 h-6 text-destructive" />}>
+                <p className="text-muted-foreground text-sm">{data.rationale.text}</p>
             </ReportCard>
         </div>
       </div>
