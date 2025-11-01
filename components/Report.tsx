@@ -1,6 +1,7 @@
+
 import React from 'react';
 import type { ReportData } from '../types';
-import { AlertIcon, CheckIcon, GaugeIcon, InfoIcon, RestartIcon, TrophyIcon } from './icons';
+import { AlertIcon, CheckIcon, GaugeIcon, InfoIcon, RestartIcon, TrophyIcon, ClockIcon } from './icons';
 
 interface ReportProps {
   data: ReportData;
@@ -91,7 +92,10 @@ export const Report: React.FC<ReportProps> = ({ data, onReset }) => {
                 <div className="flex items-center text-destructive mb-3">
                     <AlertIcon className="w-7 h-7" />
                     <h2 className="text-2xl font-bold ml-3">{data.error.title}</h2>
-                    <span className="ml-auto text-sm font-mono bg-destructive/10 text-destructive px-2 py-1 rounded">{data.error.timestamp}</span>
+                    <span className="ml-auto text-sm font-mono bg-destructive/10 text-destructive px-2 py-1 rounded flex items-center">
+                        <ClockIcon className="w-4 h-4 mr-1.5" />
+                        {data.error.timestamp}
+                    </span>
                 </div>
                 <div className="relative rounded-lg overflow-hidden border-2 border-destructive/30">
                     <img src={data.error.imageSrc} alt="Exercise frame with error" className="w-full h-auto" />
