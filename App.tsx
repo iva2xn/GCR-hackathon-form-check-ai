@@ -89,7 +89,7 @@ const App: React.FC = () => {
 3. Identify the single best aspect of the user's form that they should continue doing.
 4. Provide a detailed analysis and a step-by-step correction plan for the error.
 5. Select the single frame from the sequence (index 0 to ${NUM_FRAMES - 1}) that best illustrates this error and specify its index.
-6. Provide a detailed performance breakdown. For each of the following metrics, provide a score from 0 to 10 (where 10 is perfect) and a brief justification for that score:
+6. Provide a detailed performance breakdown. For each of the following metrics, provide a score from 0 to 10 (where 10 is perfect) and a brief justification for that score. Be encouraging and slightly generous in your scoring; reserve scores below 5 for significant, dangerous errors:
     - Spinal Alignment: Assess the neutrality of the spine throughout the movement.
     - Joint Stability: Assess the stability of key joints like knees, hips, and shoulders.
     - Range of Motion: Assess if the depth and movement range are appropriate and safe for the exercise.
@@ -111,6 +111,7 @@ You must return your response in a JSON format that adheres to the provided sche
         config: {
           responseMimeType: "application/json",
           responseSchema: reportDataSchema,
+          seed: 42,
         },
       });
       
@@ -138,9 +139,9 @@ You must return your response in a JSON format that adheres to the provided sche
       }
       
       const getLevelFromScore = (score: number): string => {
-        if (score < 50) return 'Needs Improvement';
-        if (score < 80) return 'Good';
-        if (score < 95) return 'Excellent';
+        if (score < 40) return 'Needs Improvement';
+        if (score < 75) return 'Good';
+        if (score < 90) return 'Excellent';
         return 'Perfect';
       };
 
