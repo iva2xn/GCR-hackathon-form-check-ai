@@ -223,7 +223,7 @@ const skeletonSchema = {
     properties: {
         keypoints: {
             type: Type.OBJECT,
-            description: "A map of body joint names to their normalized (x,y) coordinates.",
+            description: "A map of body joint names to their normalized (x,y) coordinates. If a keypoint is not visible, it should be omitted from the object.",
             properties: {
                 nose: { ...pointSchema }, leftShoulder: { ...pointSchema }, rightShoulder: { ...pointSchema },
                 leftElbow: { ...pointSchema }, rightElbow: { ...pointSchema }, leftHip: { ...pointSchema },
@@ -243,6 +243,7 @@ const skeletonSchema = {
             description: "Connections to highlight in red to indicate the area of the form error."
         },
     },
+    required: ['keypoints', 'connections', 'highlightedConnections'],
 };
 
 const reportDataSchema = {
@@ -257,6 +258,7 @@ const reportDataSchema = {
         errorFrameIndex: { type: Type.INTEGER, description: `The index of the frame (from 0 to 9) that best shows the error.` },
         skeleton: skeletonSchema,
       },
+      required: ['title', 'timestamp', 'errorFrameIndex', 'skeleton'],
     },
     findings: {
       type: Type.OBJECT,
@@ -269,6 +271,7 @@ const reportDataSchema = {
           description: "A list of the primary joints or body parts affected by this error."
         },
       },
+      required: ['errorName', 'description', 'confidence', 'affectedJoints'],
     },
     correctionPlan: {
       type: Type.OBJECT,
@@ -282,9 +285,11 @@ const reportDataSchema = {
               title: { type: Type.STRING, description: "A short, actionable title for a correction step." },
               description: { type: Type.STRING, description: "A detailed explanation of how to perform the correction." },
             },
+            required: ['title', 'description'],
           },
         },
       },
+      required: ['title', 'steps'],
     },
     rationale: {
       type: Type.OBJECT,
@@ -292,6 +297,8 @@ const reportDataSchema = {
         title: { type: Type.STRING, default: "Why This Correction Matters" },
         text: { type: Type.STRING, description: "An explanation of the risks of the poor form and the benefits of correcting it." },
       },
+      required: ['title', 'text'],
     },
   },
+  required: ['title', 'error', 'findings', 'correctionPlan', 'rationale'],
 };
