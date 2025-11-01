@@ -86,9 +86,10 @@ const App: React.FC = () => {
       const prompt = `You are an expert fitness coach and kinesiologist. Analyze this sequence of video frames of a user performing an exercise. Your task is to:
 1. Identify the exercise.
 2. Identify the single most critical form error that could lead to injury or reduced effectiveness.
-3. Provide a detailed analysis and a step-by-step correction plan.
-4. Generate skeleton data for a visual overlay. The keypoints must be normalized coordinates (0.0 to 1.0) relative to the image dimensions.
+3. Identify the single best aspect of the user's form that they should continue doing.
+4. Provide a detailed analysis and a step-by-step correction plan for the error.
 5. Select the single frame from the sequence (index 0 to ${NUM_FRAMES - 1}) that best illustrates this error and specify its index.
+6. Provide an overall form rating on a scale of 'Needs Improvement', 'Good', 'Excellent', or 'Perfect', along with a brief justification for this rating.
 You must return your response in a JSON format that adheres to the provided schema. Ensure all strings within the JSON are properly escaped.`;
       
       const imageParts = frames.map(f => ({
@@ -126,8 +127,8 @@ You must return your response in a JSON format that adheres to the provided sche
       }
       
       // Add validation to prevent crash if the response is malformed
-      if (!report || !report.error) {
-        console.error("Malformed report data from API, missing 'error' object.", report);
+      if (!report || !report.error || !report.formRating) {
+        console.error("Malformed report data from API, missing 'error' or 'formRating' object.", report);
         throw new Error("The AI returned an incomplete report. Please try again.");
       }
       
@@ -209,43 +210,6 @@ export default App;
 
 
 // Gemini response schema definition
-const pointSchema = {
-  type: Type.OBJECT,
-  properties: {
-    x: { type: Type.NUMBER, description: "Normalized x-coordinate (0.0 to 1.0)." },
-    y: { type: Type.NUMBER, description: "Normalized y-coordinate (0.0 to 1.0)." },
-  },
-  required: ['x', 'y'],
-};
-
-const skeletonSchema = {
-    type: Type.OBJECT,
-    properties: {
-        keypoints: {
-            type: Type.OBJECT,
-            description: "A map of body joint names to their normalized (x,y) coordinates. If a keypoint is not visible, it should be omitted from the object.",
-            properties: {
-                nose: { ...pointSchema }, leftShoulder: { ...pointSchema }, rightShoulder: { ...pointSchema },
-                leftElbow: { ...pointSchema }, rightElbow: { ...pointSchema }, leftHip: { ...pointSchema },
-                rightHip: { ...pointSchema }, pelvis: { ...pointSchema }, spine: { ...pointSchema },
-                leftKnee: { ...pointSchema }, rightKnee: { ...pointSchema }, leftAnkle: { ...pointSchema },
-                rightAnkle: { ...pointSchema },
-            }
-        },
-        connections: {
-            type: Type.ARRAY,
-            items: { type: Type.ARRAY, items: { type: Type.STRING } },
-            description: "Array of pairs of keypoint names for standard skeleton connections."
-        },
-        highlightedConnections: {
-            type: Type.ARRAY,
-            items: { type: Type.ARRAY, items: { type: Type.STRING } },
-            description: "Connections to highlight in red to indicate the area of the form error."
-        },
-    },
-    required: ['keypoints', 'connections', 'highlightedConnections'],
-};
-
 const reportDataSchema = {
   type: Type.OBJECT,
   properties: {
@@ -256,9 +220,8 @@ const reportDataSchema = {
         title: { type: Type.STRING, description: "A short, descriptive title for the main error detected." },
         timestamp: { type: Type.STRING, description: "An estimated timestamp of the error, e.g., '@ 0:12'." },
         errorFrameIndex: { type: Type.INTEGER, description: `The index of the frame (from 0 to 9) that best shows the error.` },
-        skeleton: skeletonSchema,
       },
-      required: ['title', 'timestamp', 'errorFrameIndex', 'skeleton'],
+      required: ['title', 'timestamp', 'errorFrameIndex'],
     },
     findings: {
       type: Type.OBJECT,
@@ -299,6 +262,22 @@ const reportDataSchema = {
       },
       required: ['title', 'text'],
     },
+    positiveReinforcement: {
+      type: Type.OBJECT,
+      properties: {
+        title: { type: Type.STRING, default: "What You're Doing Well" },
+        text: { type: Type.STRING, description: "An explanation of a key aspect of the form that was performed correctly." },
+      },
+      required: ['title', 'text'],
+    },
+    formRating: {
+      type: Type.OBJECT,
+      properties: {
+        level: { type: Type.STRING, description: "An overall rating of the form, chosen from: 'Needs Improvement', 'Good', 'Excellent', 'Perfect'." },
+        justification: { type: Type.STRING, description: "A brief justification for the given rating." },
+      },
+      required: ['level', 'justification'],
+    },
   },
-  required: ['title', 'error', 'findings', 'correctionPlan', 'rationale'],
+  required: ['title', 'error', 'findings', 'correctionPlan', 'rationale', 'positiveReinforcement', 'formRating'],
 };

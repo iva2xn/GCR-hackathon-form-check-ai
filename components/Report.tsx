@@ -1,8 +1,7 @@
 
 import React from 'react';
 import type { ReportData } from '../types';
-import { SkeletonOverlay } from './SkeletonOverlay';
-import { AlertIcon, CheckIcon, InfoIcon, RestartIcon } from './icons';
+import { AlertIcon, CheckIcon, GaugeIcon, InfoIcon, RestartIcon, TrophyIcon } from './icons';
 
 interface ReportProps {
   data: ReportData;
@@ -20,6 +19,49 @@ const ReportCard: React.FC<{ title: string; icon: React.ReactNode; children: Rea
 );
 
 export const Report: React.FC<ReportProps> = ({ data, onReset }) => {
+    
+  const getRatingStyles = (level: string) => {
+    switch (level) {
+      case 'Needs Improvement':
+        return {
+          container: 'bg-red-900/20 border border-red-500/50',
+          iconBg: 'bg-red-500/20',
+          iconColor: 'text-red-400',
+          textColor: 'text-red-400',
+        };
+      case 'Good':
+        return {
+          container: 'bg-yellow-900/20 border border-yellow-500/50',
+          iconBg: 'bg-yellow-500/20',
+          iconColor: 'text-yellow-400',
+          textColor: 'text-yellow-300',
+        };
+      case 'Excellent':
+        return {
+          container: 'bg-green-900/20 border border-green-500/50',
+          iconBg: 'bg-green-500/20',
+          iconColor: 'text-green-400',
+          textColor: 'text-green-300',
+        };
+      case 'Perfect':
+        return {
+          container: 'bg-cyan-900/20 border border-cyan-500/50',
+          iconBg: 'bg-cyan-500/20',
+          iconColor: 'text-cyan-400',
+          textColor: 'text-cyan-300',
+        };
+      default:
+        return {
+          container: 'bg-gray-800 border border-gray-700',
+          iconBg: 'bg-gray-700',
+          iconColor: 'text-gray-400',
+          textColor: 'text-gray-200',
+        };
+    }
+  };
+    
+  const ratingStyles = getRatingStyles(data.formRating.level);
+
   return (
     <div className="w-full mx-auto animate-fade-in">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
@@ -31,6 +73,17 @@ export const Report: React.FC<ReportProps> = ({ data, onReset }) => {
                 <RestartIcon className="w-4 h-4 mr-2" />
                 Analyze Another Video
             </button>
+        </div>
+
+        <div className={`rounded-xl p-4 sm:p-5 shadow-lg my-6 flex items-start sm:items-center gap-4 ${ratingStyles.container}`}>
+            <div className={`p-3 rounded-full ${ratingStyles.iconBg}`}>
+                <GaugeIcon className={`w-8 h-8 ${ratingStyles.iconColor}`} />
+            </div>
+            <div>
+                <p className="text-sm font-medium text-gray-400">Overall Form Rating</p>
+                <h2 className={`text-2xl font-bold ${ratingStyles.textColor}`}>{data.formRating.level}</h2>
+                <p className="text-sm text-gray-300 mt-1">{data.formRating.justification}</p>
+            </div>
         </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
@@ -45,7 +98,6 @@ export const Report: React.FC<ReportProps> = ({ data, onReset }) => {
                 </div>
                 <div className="relative rounded-lg overflow-hidden border-2 border-red-500/30">
                     <img src={data.error.imageSrc} alt="Exercise frame with error" className="w-full h-auto" />
-                    <SkeletonOverlay skeleton={data.error.skeleton} />
                 </div>
             </div>
 
@@ -63,6 +115,9 @@ export const Report: React.FC<ReportProps> = ({ data, onReset }) => {
 
         {/* Right Column */}
         <div className="lg:col-span-2 space-y-6">
+            <ReportCard title={data.positiveReinforcement.title} icon={<TrophyIcon className="w-6 h-6 text-cyan-400" />}>
+                <p className="text-gray-300 text-sm">{data.positiveReinforcement.text}</p>
+            </ReportCard>
             <ReportCard title="Specific Findings" icon={<InfoIcon className="w-6 h-6 text-yellow-400" />}>
                 <div className="space-y-4 text-gray-300">
                     <div>

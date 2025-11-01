@@ -31,3 +31,19 @@ export const RestartIcon: React.FC<{ className?: string }> = ({ className }) => 
     <path strokeLinecap="round" strokeLinejoin="round" d="M4 9a9 9 0 0114.13-5.13M20 15a9 9 0 01-14.13 5.13" />
   </svg>
 );
+
+export const GaugeIcon: React.FC<{ className?: string }> = ({ className }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 7.5l.415-.207a.75.75 0 011.085.67V10.5m0 0h6m-6 0a.75.75 0 001.085.67l.415-.207M3 12a9 9 0 1118 0 9 9 0 01-18 0z" />
+    </svg>
+);
+
+// FIX: Resolved redeclaration error by using a single, simplified definition for TrophyIcon.
+export const TrophyIcon: React.FC<{ className?: string }> = ({ className }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 18.75h-9a9.75 9.75 0 01-9-9.393V5.625a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 5.625v3.732a9.75 9.75 0 01-9 9.393zM9 18.75v2.25a1.5 1.5 0 001.5 1.5h3a1.5 1.5 0 001.5-1.5v-2.25" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 8.25h4.5" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 5.25v-.75a2.25 2.25 0 012.25-2.25h1.5" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 5.25v-.75a2.25 2.25 0 00-2.25-2.25h-1.5" />
+    </svg>
+);

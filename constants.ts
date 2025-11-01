@@ -1,4 +1,3 @@
-
 import type { ReportData } from './types';
 
 export const DUMMY_REPORT_DATA: ReportData = {
@@ -7,40 +6,6 @@ export const DUMMY_REPORT_DATA: ReportData = {
     title: 'Consistent Error Detected',
     timestamp: '@ 0:12',
     imageSrc: 'https://picsum.photos/seed/squat-form/800/600',
-    skeleton: {
-      keypoints: {
-        nose: { x: 0.5, y: 0.1 },
-        leftShoulder: { x: 0.4, y: 0.25 },
-        rightShoulder: { x: 0.6, y: 0.25 },
-        leftElbow: { x: 0.35, y: 0.4 },
-        rightElbow: { x: 0.65, y: 0.4 },
-        leftHip: { x: 0.42, y: 0.55 },
-        rightHip: { x: 0.58, y: 0.55 },
-        pelvis: { x: 0.5, y: 0.55 },
-        spine: { x: 0.5, y: 0.4 },
-        leftKnee: { x: 0.38, y: 0.75 },
-        rightKnee: { x: 0.62, y: 0.75 },
-        leftAnkle: { x: 0.35, y: 0.95 },
-        rightAnkle: { x: 0.65, y: 0.95 },
-      },
-      connections: [
-        ['leftShoulder', 'rightShoulder'],
-        ['leftShoulder', 'leftElbow'],
-        ['rightShoulder', 'rightElbow'],
-        ['leftShoulder', 'leftHip'],
-        ['rightShoulder', 'rightHip'],
-        ['leftHip', 'rightHip'],
-        ['leftHip', 'leftKnee'],
-        ['rightHip', 'rightKnee'],
-        ['leftKnee', 'leftAnkle'],
-        ['rightKnee', 'rightAnkle'],
-      ],
-      highlightedConnections: [
-        ['pelvis', 'spine'],
-        ['leftHip', 'pelvis'],
-        ['rightHip', 'pelvis'],
-      ],
-    },
   },
   findings: {
     errorName: "'Butt Wink' - Lumbar Spine Flexion",
@@ -68,5 +33,13 @@ export const DUMMY_REPORT_DATA: ReportData = {
   rationale: {
     title: 'Why This Correction Matters',
     text: 'Maintaining a neutral spine during heavy lifts like the squat is critical for preventing injury. A "butt wink" places significant shearing forces on the lumbar vertebrae and intervertebral discs. Over time, this can lead to chronic lower back pain, disc herniation, and other serious spinal injuries. Proper form not only ensures safety but also allows for more efficient force transfer, leading to better performance and strength gains.',
+  },
+  positiveReinforcement: {
+    title: "What You're Doing Well",
+    text: "Excellent spinal neutrality at the start of the lift. Your setup is strong and stable, providing a great foundation for the movement."
+  },
+  formRating: {
+    level: 'Good',
+    justification: 'Your overall form is solid, with a stable back position. The main area for improvement is achieving full depth without lumbar flexion.'
   },
 };
