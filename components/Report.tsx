@@ -81,7 +81,10 @@ export const Report: React.FC<ReportProps> = ({ data, onReset }) => {
             </div>
             <div>
                 <p className="text-sm font-medium text-gray-400">Overall Form Rating</p>
-                <h2 className={`text-2xl font-bold ${ratingStyles.textColor}`}>{data.formRating.level}</h2>
+                <h2 className={`text-2xl font-bold ${ratingStyles.textColor}`}>
+                    {data.formRating.level}
+                    <span className="text-gray-400 font-normal text-lg ml-2">({data.formRating.formScore}/100)</span>
+                </h2>
                 <p className="text-sm text-gray-300 mt-1">{data.formRating.justification}</p>
             </div>
         </div>
@@ -100,6 +103,23 @@ export const Report: React.FC<ReportProps> = ({ data, onReset }) => {
                     <img src={data.error.imageSrc} alt="Exercise frame with error" className="w-full h-auto" />
                 </div>
             </div>
+
+            <ReportCard title="Performance Breakdown" icon={<GaugeIcon className="w-6 h-6 text-cyan-400" />}>
+                <div className="space-y-5">
+                    {data.formRating.detailedScores.map((item, index) => (
+                        <div key={index}>
+                            <div className="flex justify-between items-center mb-1">
+                                <p className="font-semibold text-gray-200">{item.metric}</p>
+                                <p className="font-mono text-lg font-bold text-cyan-300">{item.score}<span className="text-sm font-normal text-gray-500">/10</span></p>
+                            </div>
+                            <div className="w-full bg-gray-700 rounded-full h-2.5">
+                                <div className="bg-cyan-500 h-2.5 rounded-full" style={{ width: `${item.score * 10}%` }}></div>
+                            </div>
+                            <p className="text-gray-400 text-xs mt-1.5">{item.justification}</p>
+                        </div>
+                    ))}
+                </div>
+            </ReportCard>
 
             <ReportCard title="Actionable Correction Plan" icon={<CheckIcon className="w-6 h-6 text-green-400" />}>
                  <div className="space-y-4">

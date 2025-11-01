@@ -1,5 +1,10 @@
-
 export type AppStatus = 'idle' | 'loading' | 'report' | 'error';
+
+export interface ScoreDetail {
+  metric: string;
+  score: number; // Score out of 10
+  justification: string;
+}
 
 export interface ReportData {
   title: string;
@@ -31,8 +36,10 @@ export interface ReportData {
     text: string;
   };
   formRating: {
+    formScore: number; // Overall score 0-100, calculated on client
     level: string;
-    justification: string;
+    justification: string; // Overall justification from AI
+    detailedScores: ScoreDetail[];
   };
 }
 

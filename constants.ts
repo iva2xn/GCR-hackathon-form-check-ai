@@ -39,7 +39,30 @@ export const DUMMY_REPORT_DATA: ReportData = {
     text: "Excellent spinal neutrality at the start of the lift. Your setup is strong and stable, providing a great foundation for the movement."
   },
   formRating: {
+    formScore: 75,
     level: 'Good',
-    justification: 'Your overall form is solid, with a stable back position. The main area for improvement is achieving full depth without lumbar flexion.'
+    justification: 'Your overall form is solid, with a strong core and good tempo. The main area for improvement is achieving full depth without lumbar flexion, which impacts your spinal alignment score.',
+    detailedScores: [
+      {
+        metric: 'Spinal Alignment',
+        score: 6,
+        justification: 'Spine is neutral at the start but shows flexion (butt wink) at the bottom of the squat.',
+      },
+      {
+        metric: 'Joint Stability',
+        score: 8,
+        justification: 'Knees track well over the feet with minimal wavering. Hips appear stable.',
+      },
+      {
+        metric: 'Range of Motion',
+        score: 7,
+        justification: 'Depth is limited by the onset of butt wink. Could be deeper with improved mobility.',
+      },
+      {
+        metric: 'Tempo & Control',
+        score: 9,
+        justification: 'The descent and ascent are smooth and well-controlled, showing good command of the weight.',
+      },
+    ],
   },
 };

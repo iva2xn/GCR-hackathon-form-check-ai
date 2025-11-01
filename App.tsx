@@ -5,7 +5,7 @@ import { LoadingSpinner } from './components/LoadingSpinner';
 import { Report } from './components/Report';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
-import type { AppStatus, ReportData } from './types';
+import type { AppStatus, ReportData, ScoreDetail } from './types';
 
 const App: React.FC = () => {
   const [status, setStatus] = useState<AppStatus>('idle');
@@ -89,7 +89,12 @@ const App: React.FC = () => {
 3. Identify the single best aspect of the user's form that they should continue doing.
 4. Provide a detailed analysis and a step-by-step correction plan for the error.
 5. Select the single frame from the sequence (index 0 to ${NUM_FRAMES - 1}) that best illustrates this error and specify its index.
-6. Provide an overall form rating on a scale of 'Needs Improvement', 'Good', 'Excellent', or 'Perfect', along with a brief justification for this rating.
+6. Provide a detailed performance breakdown. For each of the following metrics, provide a score from 0 to 10 (where 10 is perfect) and a brief justification for that score:
+    - Spinal Alignment: Assess the neutrality of the spine throughout the movement.
+    - Joint Stability: Assess the stability of key joints like knees, hips, and shoulders.
+    - Range of Motion: Assess if the depth and movement range are appropriate and safe for the exercise.
+    - Tempo & Control: Assess the smoothness and control of the movement, noting any jerky or rushed motions.
+7. Based on your detailed breakdown, provide a final, overall justification summarizing the performance.
 You must return your response in a JSON format that adheres to the provided schema. Ensure all strings within the JSON are properly escaped.`;
       
       const imageParts = frames.map(f => ({
@@ -115,9 +120,9 @@ You must return your response in a JSON format that adheres to the provided sche
         .replace(/^```json\s*/, '')
         .replace(/\s*```$/, '');
 
-      let report: ReportData;
+      let report: any; // Use any temporarily to add the derived properties
       try {
-        report = JSON.parse(cleanedText) as ReportData;
+        report = JSON.parse(cleanedText);
       } catch (parseError) {
         console.error("Failed to parse JSON response from API.");
         console.error("Raw response:", response.text);
@@ -127,11 +132,26 @@ You must return your response in a JSON format that adheres to the provided sche
       }
       
       // Add validation to prevent crash if the response is malformed
-      if (!report || !report.error || !report.formRating) {
-        console.error("Malformed report data from API, missing 'error' or 'formRating' object.", report);
+      if (!report || !report.error || !report.formRating || !report.formRating.detailedScores || report.formRating.detailedScores.length === 0) {
+        console.error("Malformed report data from API, missing 'error' or 'formRating.detailedScores'.", report);
         throw new Error("The AI returned an incomplete report. Please try again.");
       }
       
+      const getLevelFromScore = (score: number): string => {
+        if (score < 50) return 'Needs Improvement';
+        if (score < 80) return 'Good';
+        if (score < 95) return 'Excellent';
+        return 'Perfect';
+      };
+
+      // Calculate the overall score from the detailed breakdown
+      const totalScore = report.formRating.detailedScores.reduce((sum: number, item: ScoreDetail) => sum + item.score, 0);
+      const averageScore = totalScore / report.formRating.detailedScores.length;
+      report.formRating.formScore = Math.round(averageScore * 10);
+      
+      // Add the qualitative level to the report data based on the calculated numerical score
+      report.formRating.level = getLevelFromScore(report.formRating.formScore);
+
       setLoadingMessage('Finalizing your report...');
       const errorFrameIndex = report.error.errorFrameIndex ?? Math.floor(NUM_FRAMES / 2);
       
@@ -141,7 +161,7 @@ You must return your response in a JSON format that adheres to the provided sche
       const errorFrameData = frames[safeFrameIndex];
       report.error.imageSrc = `data:${errorFrameData.mimeType};base64,${errorFrameData.frame}`;
 
-      setReportData(report);
+      setReportData(report as ReportData);
       setStatus('report');
 
     } catch (err) {
@@ -273,10 +293,22 @@ const reportDataSchema = {
     formRating: {
       type: Type.OBJECT,
       properties: {
-        level: { type: Type.STRING, description: "An overall rating of the form, chosen from: 'Needs Improvement', 'Good', 'Excellent', 'Perfect'." },
-        justification: { type: Type.STRING, description: "A brief justification for the given rating." },
+        justification: { type: Type.STRING, description: "A brief overall justification for the performance, summarizing the key points from the breakdown." },
+        detailedScores: {
+          type: Type.ARRAY,
+          description: "A detailed breakdown of the form based on key kinesiological principles.",
+          items: {
+            type: Type.OBJECT,
+            properties: {
+              metric: { type: Type.STRING, description: "The name of the performance metric being evaluated (e.g., 'Spinal Alignment')." },
+              score: { type: Type.INTEGER, description: "A score from 0 to 10 for this specific metric." },
+              justification: { type: Type.STRING, description: "A brief justification for the score given to this metric." }
+            },
+            required: ['metric', 'score', 'justification']
+          }
+        }
       },
-      required: ['level', 'justification'],
+      required: ['justification', 'detailedScores'],
     },
   },
   required: ['title', 'error', 'findings', 'correctionPlan', 'rationale', 'positiveReinforcement', 'formRating'],
