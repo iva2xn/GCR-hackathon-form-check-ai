@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { GoogleGenAI, Type } from "@google/genai";
 import { FileUpload } from './components/FileUpload';
@@ -43,7 +44,7 @@ const App: React.FC = () => {
       URL.revokeObjectURL(video.src);
       const duration = video.duration;
       setVideoDuration(duration);
-      const defaultEndTime = Math.min(5, duration);
+      const defaultEndTime = Math.min(10, duration);
       setStartTime(0);
       setEndTime(defaultEndTime);
     };
@@ -106,8 +107,8 @@ const App: React.FC = () => {
   const handleAnalyze = async () => {
     if (!file) return;
 
-    if (endTime - startTime > 5.1) { // Add a small buffer for floating point inaccuracies
-      setErrorMessage("The selected video clip must be 5 seconds or less.");
+    if (endTime - startTime > 10.1) { // Add a small buffer for floating point inaccuracies
+      setErrorMessage("The selected video clip must be 10 seconds or less.");
       setStatus('error');
       return;
     }
@@ -119,7 +120,7 @@ const App: React.FC = () => {
 
     setStatus('loading');
     setErrorMessage('');
-    setLoadingMessage('Initializing analysis...');
+    let analysisInterval: number | undefined;
 
     try {
       const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
@@ -149,7 +150,22 @@ You must return your response in a JSON format that adheres to the provided sche
         }
       }));
       
-      setLoadingMessage('AI coach is analyzing your movement patterns...');
+      const analysisSteps = [
+        'AI coach is analyzing your movement patterns...',
+        'Identifying key joint angles and positions...',
+        'Evaluating spinal and pelvic alignment...',
+        'Assessing joint stability and control...',
+        'Checking range of motion and tempo...',
+        'Comparing your form against ideal biomechanics...',
+        'Pinpointing the most critical area for improvement...',
+      ];
+      let stepIndex = 0;
+      setLoadingMessage(analysisSteps[stepIndex]);
+      analysisInterval = window.setInterval(() => {
+          stepIndex = (stepIndex + 1) % analysisSteps.length;
+          setLoadingMessage(analysisSteps[stepIndex]);
+      }, 2500);
+
       const response = await ai.models.generateContent({
         model: 'gemini-2.5-flash',
         contents: { parts: [{ text: prompt }, ...imageParts] },
@@ -160,6 +176,9 @@ You must return your response in a JSON format that adheres to the provided sche
         },
       });
       
+      clearInterval(analysisInterval);
+      analysisInterval = undefined;
+
       setLoadingMessage('Compiling findings and correction plan...');
       const cleanedText = response.text
         .trim()
@@ -207,6 +226,9 @@ You must return your response in a JSON format that adheres to the provided sche
       setStatus('report');
 
     } catch (err) {
+      if (analysisInterval) {
+        clearInterval(analysisInterval);
+      }
       console.error("Error analyzing video:", err);
       const message = err instanceof Error ? err.message : 'An unknown error occurred.';
       setErrorMessage(`Failed to analyze the video. ${message}`);

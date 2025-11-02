@@ -100,13 +100,13 @@ export const FileUpload: React.FC<FileUploadProps> = ({
 
     if (isDraggingHandle === 'start') {
         newStart = Math.max(0, Math.min(newTime, newEnd - 0.1));
-        if (newEnd - newStart > 5) {
-            newEnd = newStart + 5;
+        if (newEnd - newStart > 10) {
+            newEnd = newStart + 10;
         }
     } else {
         newEnd = Math.min(videoDuration, Math.max(newTime, newStart + 0.1));
-        if (newEnd - newStart > 5) {
-            newStart = newEnd - 5;
+        if (newEnd - newStart > 10) {
+            newStart = newEnd - 10;
         }
     }
 
@@ -196,15 +196,15 @@ export const FileUpload: React.FC<FileUploadProps> = ({
       </h2>
       <p className="text-muted-foreground mb-6 sm:mb-8 max-w-lg mx-auto">
         {file
-          ? 'Use the timeline to select a 5-second clip. Hover over the video to play the selected loop.'
+          ? 'Use the timeline to select a 10-second clip. Hover over the video to play the selected loop.'
           : 'Upload a video of your workout. Our AI will analyze your movement, detect critical errors, and provide actionable feedback to improve your form and prevent injury.'}
       </p>
 
       {file && videoUrl ? (
         <div className="w-full max-w-2xl mx-auto">
           <div className="flex justify-end mb-2">
-            <div className={`text-xs font-sans px-2 py-1 rounded-md transition-colors ${clipDuration > 5.01 ? 'bg-destructive/10 text-destructive' : 'bg-secondary text-secondary-foreground'}`}>
-              Clip: {clipDuration.toFixed(2)}s / 5.00s
+            <div className={`text-xs font-sans px-2 py-1 rounded-md transition-colors ${clipDuration > 10.01 ? 'bg-destructive/10 text-destructive' : 'bg-secondary text-secondary-foreground'}`}>
+              Clip: {clipDuration.toFixed(2)}s / 10.00s
             </div>
           </div>
           <div className="relative group bg-black rounded-md overflow-hidden cursor-pointer" onClick={handlePreviewToggle}>
@@ -295,7 +295,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
         )}
         <button
           onClick={onAnalyze}
-          disabled={!file || clipDuration <= 0 || clipDuration > 5.1}
+          disabled={!file || clipDuration <= 0 || clipDuration > 10.1}
           className="w-full sm:w-auto inline-flex items-center justify-center px-8 py-3 text-lg font-bold text-primary-foreground bg-primary rounded-md shadow-sm transition-colors enabled:hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
         >
           {file ? `Analyze ${clipDuration > 0 ? clipDuration.toFixed(1) : '0.0'}s Clip` : 'Analyze Form'}
