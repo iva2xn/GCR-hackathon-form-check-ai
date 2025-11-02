@@ -55,7 +55,50 @@ export const Report: React.FC<ReportProps> = ({ data, onReset }) => {
     }
   };
     
+  const getFeedbackStyles = (feedbackType: 'error' | 'refinement' | 'optimization') => {
+    switch (feedbackType) {
+      case 'error':
+        return {
+          container: 'border-destructive/50 shadow-destructive/10',
+          text: 'text-destructive',
+          iconBg: 'bg-destructive/10',
+          icon: <AlertIcon className="w-7 h-7 text-destructive" />,
+          border: 'border-destructive/30',
+          findingsText: 'text-destructive'
+        };
+      case 'refinement':
+        return {
+          container: 'border-yellow-500/50 shadow-yellow-500/10',
+          text: 'text-yellow-400',
+          iconBg: 'bg-yellow-500/10',
+          icon: <InfoIcon className="w-7 h-7 text-yellow-500" />,
+          border: 'border-yellow-500/30',
+          findingsText: 'text-yellow-400'
+        };
+      case 'optimization':
+        return {
+          container: 'border-primary/50 shadow-primary/10',
+          text: 'text-primary',
+          iconBg: 'bg-primary/10',
+          icon: <TrophyIcon className="w-7 h-7 text-primary" />,
+          border: 'border-primary/30',
+          findingsText: 'text-primary'
+        };
+      default:
+          return {
+          container: 'border-destructive/50 shadow-destructive/10',
+          text: 'text-destructive',
+          iconBg: 'bg-destructive/10',
+          icon: <AlertIcon className="w-7 h-7 text-destructive" />,
+          border: 'border-destructive/30',
+          findingsText: 'text-destructive'
+        };
+    }
+  };
+
   const ratingStyles = getRatingStyles(data.formRating.level);
+  const feedbackStyles = getFeedbackStyles(data.error.feedbackType);
+
 
   return (
     <div className="w-full mx-auto animate-fade-in">
@@ -88,17 +131,17 @@ export const Report: React.FC<ReportProps> = ({ data, onReset }) => {
         
         {/* Left Column */}
         <div className="lg:col-span-3 space-y-6">
-            <div className="bg-card border border-destructive/50 rounded-xl p-4 sm:p-6 shadow-md shadow-destructive/10">
-                <div className="flex items-center text-destructive mb-3">
-                    <AlertIcon className="w-7 h-7" />
+            <div className={`bg-card border rounded-xl p-4 sm:p-6 shadow-md ${feedbackStyles.container}`}>
+                <div className={`flex items-center mb-3 ${feedbackStyles.text}`}>
+                    {feedbackStyles.icon}
                     <h2 className="text-2xl font-bold ml-3">{data.error.title}</h2>
-                    <span className="ml-auto text-sm font-mono bg-destructive/10 text-destructive px-2 py-1 rounded flex items-center">
+                    <span className={`ml-auto text-sm font-mono px-2 py-1 rounded flex items-center ${feedbackStyles.iconBg} ${feedbackStyles.text}`}>
                         <ClockIcon className="w-4 h-4 mr-1.5" />
                         {data.error.timestamp}
                     </span>
                 </div>
-                <div className="relative rounded-lg overflow-hidden border-2 border-destructive/30">
-                    <img src={data.error.imageSrc} alt="Exercise frame with error" className="w-full h-auto" />
+                <div className={`relative rounded-lg overflow-hidden border-2 ${feedbackStyles.border}`}>
+                    <img src={data.error.imageSrc} alt="Exercise frame with feedback" className="w-full h-auto" />
                 </div>
             </div>
 
@@ -119,7 +162,7 @@ export const Report: React.FC<ReportProps> = ({ data, onReset }) => {
                 </div>
             </ReportCard>
 
-            <ReportCard title="Actionable Correction Plan" icon={<CheckIcon className="w-6 h-6 text-green-500" />}>
+            <ReportCard title={data.correctionPlan.title} icon={<CheckIcon className="w-6 h-6 text-green-500" />}>
                  <div className="space-y-4">
                     {data.correctionPlan.steps.map((step, index) => (
                         <div key={index}>
@@ -139,8 +182,8 @@ export const Report: React.FC<ReportProps> = ({ data, onReset }) => {
             <ReportCard title="Specific Findings" icon={<InfoIcon className="w-6 h-6 text-yellow-500" />}>
                 <div className="space-y-4">
                     <div>
-                        <p className="text-sm text-muted-foreground font-medium">Error Name</p>
-                        <p className="font-semibold text-destructive">{data.findings.errorName}</p>
+                        <p className="text-sm text-muted-foreground font-medium">Feedback</p>
+                        <p className={`font-semibold ${feedbackStyles.findingsText}`}>{data.findings.errorName}</p>
                     </div>
                     <div>
                         <p className="text-sm text-muted-foreground font-medium">Description</p>

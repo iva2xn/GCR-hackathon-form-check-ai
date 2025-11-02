@@ -129,13 +129,16 @@ const App: React.FC = () => {
       setLoadingMessage('Extracting key frames from your video...');
       const frames = await extractFrames(file, NUM_FRAMES, startTime, endTime);
       
-      const prompt = `You are an expert fitness coach and kinesiologist. Analyze this sequence of video frames of a user performing an exercise. Your task is to:
-1. Identify the exercise.
-2. Identify the single most critical form error that could lead to injury or reduced effectiveness.
+      const prompt = `You are an expert fitness coach and kinesiologist with a positive and encouraging tone. Your primary goal is to provide accurate, helpful feedback to improve a user's exercise form and prevent injury. Analyze this sequence of video frames of a user performing an exercise. Your task is to:
+1. Identify the exercise being performed.
+2. Critically evaluate the user's form. Your main feedback should focus on the single most important area for improvement. 
+   - If a critical error exists (something that could lead to injury), focus on that.
+   - If the form is good but could be better, focus on the most impactful refinement.
+   - If the form is excellent, acknowledge this and provide a tip for advanced optimization or variation.
 3. Identify the single best aspect of the user's form that they should continue doing.
-4. Provide a detailed analysis and a step-by-step correction plan for the error.
-5. Select the single frame from the sequence (index 0 to ${NUM_FRAMES - 1}) that best illustrates this error and specify its index.
-6. Provide a detailed performance breakdown. For each of the following metrics, provide a score from 0 to 10 (where 10 is perfect) and a brief justification for that score. Be encouraging and slightly generous in your scoring; reserve scores below 5 for significant, dangerous errors:
+4. Provide a detailed analysis and a step-by-step correction or refinement plan for the main point of feedback.
+5. Select the single frame from the sequence (index 0 to ${NUM_FRAMES - 1}) that best illustrates your main feedback point (whether it's an error, a refinement, or a moment of good form to optimize) and specify its index.
+6. Provide a detailed performance breakdown. For each of the following metrics, provide a score from 0 to 10 (where 10 is perfect) and a brief justification. Be realistic and constructive in your scoring. Scores of 9-10 should be reserved for textbook execution.
     - Spinal Alignment: Assess the neutrality of the spine throughout the movement.
     - Joint Stability: Assess the stability of key joints like knees, hips, and shoulders.
     - Range of Motion: Assess if the depth and movement range are appropriate and safe for the exercise.
@@ -196,8 +199,8 @@ You must return your response in a JSON format that adheres to the provided sche
         throw new Error("The AI returned a response with an invalid format.");
       }
       
-      if (!report || !report.error || !report.formRating || !report.formRating.detailedScores || report.formRating.detailedScores.length === 0) {
-        console.error("Malformed report data from API, missing 'error' or 'formRating.detailedScores'.", report);
+      if (!report || !report.error || !report.error.feedbackType || !report.formRating || !report.formRating.detailedScores || report.formRating.detailedScores.length === 0) {
+        console.error("Malformed report data from API, missing key fields like 'error', 'error.feedbackType' or 'formRating.detailedScores'.", report);
         throw new Error("The AI returned an incomplete report. Please try again.");
       }
       
@@ -306,21 +309,22 @@ const reportDataSchema = {
     error: {
       type: Type.OBJECT,
       properties: {
-        title: { type: Type.STRING, description: "A short, descriptive title for the main error detected." },
-        timestamp: { type: Type.STRING, description: "An estimated timestamp of the error, e.g., '@ 0:12'." },
-        errorFrameIndex: { type: Type.INTEGER, description: `The index of the frame (from 0 to 9) that best shows the error.` },
+        title: { type: Type.STRING, description: "A short, descriptive title for the main feedback point (this could be an error, a refinement, or an optimization tip)." },
+        timestamp: { type: Type.STRING, description: "An estimated timestamp of the feedback point, e.g., '@ 0:12'." },
+        errorFrameIndex: { type: Type.INTEGER, description: `The index of the frame (from 0 to 9) that best illustrates the main feedback point.` },
+        feedbackType: { type: Type.STRING, description: "The category of the feedback. Must be one of: 'error', 'refinement', or 'optimization'."}
       },
-      required: ['title', 'timestamp', 'errorFrameIndex'],
+      required: ['title', 'timestamp', 'errorFrameIndex', 'feedbackType'],
     },
     findings: {
       type: Type.OBJECT,
       properties: {
-        errorName: { type: Type.STRING, description: "A technical or common name for the error, e.g., '\"Butt Wink\" - Lumbar Spine Flexion'." },
-        description: { type: Type.STRING, description: "An explanation of what the error is and its potential causes." },
+        errorName: { type: Type.STRING, description: "A technical or common name for the feedback point, e.g., '\"Butt Wink\"', 'Deeper Hip Hinge', or 'Advanced Core Bracing'." },
+        description: { type: Type.STRING, description: "An explanation of the feedback point (what it is and why it's important)." },
         confidence: { type: Type.STRING, description: "The AI's confidence level, e.g., '94% High'." },
         affectedJoints: {
           type: Type.ARRAY, items: { type: Type.STRING },
-          description: "A list of the primary joints or body parts affected by this error."
+          description: "A list of the primary joints or body parts related to this feedback."
         },
       },
       required: ['errorName', 'description', 'confidence', 'affectedJoints'],
@@ -328,7 +332,7 @@ const reportDataSchema = {
     correctionPlan: {
       type: Type.OBJECT,
       properties: {
-        title: { type: Type.STRING, default: "Actionable Correction Plan" },
+        title: { type: Type.STRING, description: "Title for the plan, e.g., 'Actionable Correction Plan', 'Refinement Strategy', or 'Optimization Technique'." },
         steps: {
           type: Type.ARRAY,
           items: {
@@ -346,8 +350,8 @@ const reportDataSchema = {
     rationale: {
       type: Type.OBJECT,
       properties: {
-        title: { type: Type.STRING, default: "Why This Correction Matters" },
-        text: { type: Type.STRING, description: "An explanation of the risks of the poor form and the benefits of correcting it." },
+        title: { type: Type.STRING, description: "Title for the rationale, e.g., 'Why This Matters', 'Benefits of this Refinement'." },
+        text: { type: Type.STRING, description: "An explanation of the risks of the poor form and the benefits of correcting it, or the benefits of the suggested refinement." },
       },
       required: ['title', 'text'],
     },

@@ -11,8 +11,9 @@ export interface ReportData {
   error: {
     title: string;
     timestamp: string;
-    imageSrc: string; // Placeholder image, will be replaced by data URL
-    errorFrameIndex?: number; // Used by AI to specify which frame to show
+    imageSrc: string; 
+    errorFrameIndex: number;
+    feedbackType: 'error' | 'refinement' | 'optimization';
   };
   findings: {
     errorName: string;

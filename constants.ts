@@ -1,3 +1,4 @@
+
 import type { ReportData } from './types';
 
 export const DUMMY_REPORT_DATA: ReportData = {
@@ -6,6 +7,9 @@ export const DUMMY_REPORT_DATA: ReportData = {
     title: 'Consistent Error Detected',
     timestamp: '@ 0:12',
     imageSrc: 'https://picsum.photos/seed/squat-form/800/600',
+    // FIX: Add missing properties errorFrameIndex and feedbackType to match the ReportData type.
+    errorFrameIndex: 5,
+    feedbackType: 'error',
   },
   findings: {
     errorName: "'Butt Wink' - Lumbar Spine Flexion",
