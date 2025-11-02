@@ -14,6 +14,9 @@ const App: React.FC = () => {
   const [reportData, setReportData] = useState<ReportData | null>(null);
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [loadingMessage, setLoadingMessage] = useState<string>('');
+  const [startTime, setStartTime] = useState(0);
+  const [endTime, setEndTime] = useState(5);
+  const [videoDuration, setVideoDuration] = useState(0);
 
   useEffect(() => {
     // Clean up the object URL to avoid memory leaks
@@ -29,10 +32,34 @@ const App: React.FC = () => {
     if (videoUrl) {
       URL.revokeObjectURL(videoUrl);
     }
-    setVideoUrl(URL.createObjectURL(selectedFile));
+    const newVideoUrl = URL.createObjectURL(selectedFile);
+    setVideoUrl(newVideoUrl);
+    setReportData(null); // Reset report on new file
+
+    // Create a temporary video element to get duration
+    const video = document.createElement('video');
+    video.preload = 'metadata';
+    video.onloadedmetadata = () => {
+      URL.revokeObjectURL(video.src);
+      const duration = video.duration;
+      setVideoDuration(duration);
+      const defaultEndTime = Math.min(5, duration);
+      setStartTime(0);
+      setEndTime(defaultEndTime);
+    };
+    video.src = newVideoUrl;
+    video.onerror = () => {
+      setErrorMessage("Could not load video metadata. The file might be corrupted.");
+      setStatus('error');
+    }
+  };
+  
+  const handleTimeRangeChange = (start: number, end: number) => {
+    setStartTime(start);
+    setEndTime(end);
   };
 
-  const extractFrames = async (videoFile: File, numFrames: number): Promise<{frame: string, mimeType: string}[]> => {
+  const extractFrames = async (videoFile: File, numFrames: number, startTime: number, endTime: number): Promise<{frame: string, mimeType: string}[]> => {
     return new Promise((resolve, reject) => {
       const video = document.createElement('video');
       video.preload = 'metadata';
@@ -45,11 +72,17 @@ const App: React.FC = () => {
       video.onloadedmetadata = async () => {
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
-        const duration = video.duration;
-        const interval = duration / numFrames;
+        const clipDuration = endTime - startTime;
+
+        if (clipDuration <= 0) {
+            reject(new Error("Invalid time range. Duration must be greater than 0."));
+            return;
+        }
+
+        const interval = clipDuration / numFrames;
         
         for (let i = 0; i < numFrames; i++) {
-          video.currentTime = i * interval;
+          video.currentTime = startTime + (i * interval);
           await new Promise(r => video.onseeked = r);
           if (!ctx) {
               reject(new Error("Canvas context not available"));
@@ -72,16 +105,28 @@ const App: React.FC = () => {
 
   const handleAnalyze = async () => {
     if (!file) return;
+
+    if (endTime - startTime > 5.1) { // Add a small buffer for floating point inaccuracies
+      setErrorMessage("The selected video clip must be 5 seconds or less.");
+      setStatus('error');
+      return;
+    }
+    if (endTime - startTime <= 0) {
+      setErrorMessage("Please select a valid time range to analyze.");
+      setStatus('error');
+      return;
+    }
+
     setStatus('loading');
     setErrorMessage('');
     setLoadingMessage('Initializing analysis...');
 
     try {
       const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-      const NUM_FRAMES = 10; // Reduced for faster analysis
+      const NUM_FRAMES = 10;
       
       setLoadingMessage('Extracting key frames from your video...');
-      const frames = await extractFrames(file, NUM_FRAMES);
+      const frames = await extractFrames(file, NUM_FRAMES, startTime, endTime);
       
       const prompt = `You are an expert fitness coach and kinesiologist. Analyze this sequence of video frames of a user performing an exercise. Your task is to:
 1. Identify the exercise.
@@ -106,7 +151,7 @@ You must return your response in a JSON format that adheres to the provided sche
       
       setLoadingMessage('AI coach is analyzing your movement patterns...');
       const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash', // Switched to Flash model for speed
+        model: 'gemini-2.5-flash',
         contents: { parts: [{ text: prompt }, ...imageParts] },
         config: {
           responseMimeType: "application/json",
@@ -121,7 +166,7 @@ You must return your response in a JSON format that adheres to the provided sche
         .replace(/^```json\s*/, '')
         .replace(/\s*```$/, '');
 
-      let report: any; // Use any temporarily to add the derived properties
+      let report: any;
       try {
         report = JSON.parse(cleanedText);
       } catch (parseError) {
@@ -132,7 +177,6 @@ You must return your response in a JSON format that adheres to the provided sche
         throw new Error("The AI returned a response with an invalid format.");
       }
       
-      // Add validation to prevent crash if the response is malformed
       if (!report || !report.error || !report.formRating || !report.formRating.detailedScores || report.formRating.detailedScores.length === 0) {
         console.error("Malformed report data from API, missing 'error' or 'formRating.detailedScores'.", report);
         throw new Error("The AI returned an incomplete report. Please try again.");
@@ -145,18 +189,15 @@ You must return your response in a JSON format that adheres to the provided sche
         return 'Perfect';
       };
 
-      // Calculate the overall score from the detailed breakdown
       const totalScore = report.formRating.detailedScores.reduce((sum: number, item: ScoreDetail) => sum + item.score, 0);
       const averageScore = totalScore / report.formRating.detailedScores.length;
       report.formRating.formScore = Math.round(averageScore * 10);
       
-      // Add the qualitative level to the report data based on the calculated numerical score
       report.formRating.level = getLevelFromScore(report.formRating.formScore);
 
       setLoadingMessage('Finalizing your report...');
       const errorFrameIndex = report.error.errorFrameIndex ?? Math.floor(NUM_FRAMES / 2);
       
-      // Ensure the frame index is within bounds
       const safeFrameIndex = Math.max(0, Math.min(frames.length - 1, errorFrameIndex));
 
       const errorFrameData = frames[safeFrameIndex];
@@ -209,6 +250,11 @@ You must return your response in a JSON format that adheres to the provided sche
             onFileSelect={handleFileSelect}
             onAnalyze={handleAnalyze}
             file={file}
+            videoUrl={videoUrl}
+            videoDuration={videoDuration}
+            startTime={startTime}
+            endTime={endTime}
+            onTimeRangeChange={handleTimeRangeChange}
           />
         );
     }
