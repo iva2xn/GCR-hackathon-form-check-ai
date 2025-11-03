@@ -123,7 +123,7 @@ const App: React.FC = () => {
     let analysisInterval: number | undefined;
 
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.VITE_API_KEY });
+      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
       const NUM_FRAMES = 10;
       
       setLoadingMessage('Extracting key frames from your video...');
