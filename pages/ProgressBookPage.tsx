@@ -30,7 +30,7 @@ const Page = forwardRef<HTMLDivElement, { children: React.ReactNode, number: num
             ></div>
             
             <div className="relative z-10 flex-grow flex flex-col">{children}</div>
-            <div className={`relative z-10 text-xs text-gray-500 font-mono pt-2 ${number % 2 === 0 ? 'text-right' : 'text-left'}`}>{number}</div>
+            <div className={`absolute bottom-2 z-10 text-xs text-gray-400 font-mono ${number % 2 === 0 ? 'right-4' : 'left-4'}`}>{number}</div>
         </div>
     );
 });
@@ -98,10 +98,13 @@ export const ProgressBookPage: React.FC = () => {
         );
     }
     
+    // FIX: The react-pageflip library has incorrect TypeScript definitions, marking optional props as required.
+    // Casting to `any` to bypass the type checking for this component and avoid compilation errors.
+    const AnyHTMLFlipBook = HTMLFlipBook as any;
+
     return (
         <div ref={containerRef} className="w-full flex justify-center items-center animate-fade-in" style={{ minHeight: `${bookSize.height + 40}px` }}>
-            {/* FIX: Explicitly set the `size` prop to "fixed" to satisfy the component's strict TypeScript props validation, which incorrectly flags missing optional props. */}
-            <HTMLFlipBook 
+            <AnyHTMLFlipBook
                 width={bookSize.width} 
                 height={bookSize.height}
                 size="fixed"
@@ -119,29 +122,30 @@ export const ProgressBookPage: React.FC = () => {
 
                 {updates.map((update, index) => (
                     <Page key={update.id} number={index + 1}>
-                       <div className="h-full w-full flex flex-col">
-                            <div className="flex-grow flex justify-center items-center py-4">
-                                <div className="transform -rotate-2 hover:rotate-1 transition-transform duration-300 ease-in-out">
-                                    <div className="bg-white dark:bg-gray-100 p-3 rounded-sm shadow-lg">
-                                        <img 
-                                            src={update.imageBase64} 
-                                            alt={`Progress on ${update.date}`} 
-                                            className="object-cover border border-gray-200"
-                                            style={{ width: '220px', height: '220px' }}
-                                        />
-                                        <p className="w-full text-center font-serif text-base text-gray-800 mt-3">
-                                            {new Date(update.date).toLocaleDateString('en-US', {
-                                                year: 'numeric', month: 'long', day: 'numeric' 
-                                            })}
-                                        </p>
-                                    </div>
+                       <div className="h-full w-full flex flex-col justify-center items-center">
+                            <div className="transform -rotate-2 hover:rotate-1 transition-transform duration-300 ease-in-out">
+                                <div className="bg-white dark:bg-gray-100 p-3 rounded-sm shadow-lg">
+                                    <img 
+                                        src={update.imageBase64} 
+                                        alt={`Progress on ${new Date(update.date).toLocaleDateString()}`} 
+                                        className="object-cover border border-gray-200"
+                                        style={{ width: '220px', height: '220px' }}
+                                    />
+                                    <p className="w-full text-left font-digital text-lg text-gray-500 mt-2 px-1">
+                                        {new Date(update.date).toLocaleDateString('en-US', {
+                                            year: '2-digit', month: '2-digit', day: '2-digit' 
+                                        })}
+                                    </p>
                                 </div>
                             </div>
                             
-                            <div className="w-full text-center font-mono text-sm space-y-1 text-gray-800">
-                                <p><span className="font-semibold">Weight:</span> {update.weight} kg/lbs</p>
+                            <div 
+                                className="absolute w-full px-8 font-doodle text-2xl text-gray-700 transform -rotate-1"
+                                style={{ bottom: '56px' }}
+                            >
+                                <p className="font-bold">Weight: {update.weight} kg/lbs</p>
                                 {update.protein != null && (
-                                     <p><span className="font-semibold">Protein:</span> {update.protein}g</p>
+                                     <p className="font-bold mt-4">Protein: {update.protein}g</p>
                                 )}
                             </div>
                        </div>
@@ -153,7 +157,7 @@ export const ProgressBookPage: React.FC = () => {
                         <h2 className="text-2xl font-bold font-serif">To Be Continued...</h2>
                     </div>
                 </PageCover>
-            </HTMLFlipBook>
+            </AnyHTMLFlipBook>
         </div>
     );
 };
