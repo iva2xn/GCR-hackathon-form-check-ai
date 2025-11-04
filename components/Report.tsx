@@ -1,21 +1,12 @@
 import React from 'react';
 import type { ReportData } from '../types';
 import { AlertIcon, CheckIcon, GaugeIcon, InfoIcon, RestartIcon, TrophyIcon, ClockIcon, FormCheckIcon } from './icons';
+import { AccordionItem } from './Accordion';
 
 interface ReportProps {
   data: ReportData;
   onReset: () => void;
 }
-
-const ReportCard: React.FC<{ title: string; icon: React.ReactNode; children: React.ReactNode }> = ({ title, icon, children }) => (
-    <div className="bg-card rounded-xl p-6 border border-border shadow-sm">
-        <div className="flex items-center mb-4">
-            {icon}
-            <h3 className="text-xl font-bold ml-3 text-card-foreground">{title}</h3>
-        </div>
-        {children}
-    </div>
-);
 
 export const Report: React.FC<ReportProps> = ({ data, onReset }) => {
     
@@ -24,31 +15,26 @@ export const Report: React.FC<ReportProps> = ({ data, onReset }) => {
       case 'Needs Improvement':
         return {
           container: 'bg-destructive/10 border-destructive/30 text-destructive',
-          iconBg: 'bg-destructive/10',
           iconColor: 'text-destructive',
         };
       case 'Good':
         return {
           container: 'bg-yellow-500/10 border-yellow-500/30 text-yellow-300',
-          iconBg: 'bg-yellow-500/10',
           iconColor: 'text-yellow-400',
         };
       case 'Excellent':
         return {
           container: 'bg-green-500/10 border-green-500/30 text-green-300',
-          iconBg: 'bg-green-500/10',
           iconColor: 'text-green-400',
         };
       case 'Perfect':
         return {
           container: 'bg-primary/10 border-primary/30 text-primary',
-          iconBg: 'bg-primary/10',
           iconColor: 'text-primary',
         };
       default:
         return {
           container: 'bg-card border-border text-foreground',
-          iconBg: 'bg-muted',
           iconColor: 'text-muted-foreground',
         };
     }
@@ -59,29 +45,25 @@ export const Report: React.FC<ReportProps> = ({ data, onReset }) => {
       case 'error':
         return {
           text: 'text-destructive',
-          iconBg: 'bg-destructive/10',
-          icon: <AlertIcon className="w-7 h-7 text-destructive" />,
+          icon: <AlertIcon className="w-6 h-6 text-destructive" />,
           findingsText: 'text-destructive'
         };
       case 'refinement':
         return {
           text: 'text-yellow-400',
-          iconBg: 'bg-yellow-500/10',
-          icon: <InfoIcon className="w-7 h-7 text-yellow-500" />,
+          icon: <InfoIcon className="w-6 h-6 text-yellow-500" />,
           findingsText: 'text-yellow-400'
         };
       case 'optimization':
         return {
           text: 'text-primary',
-          iconBg: 'bg-primary/10',
-          icon: <TrophyIcon className="w-7 h-7 text-primary" />,
+          icon: <TrophyIcon className="w-6 h-6 text-primary" />,
           findingsText: 'text-primary'
         };
       default:
           return {
           text: 'text-destructive',
-          iconBg: 'bg-destructive/10',
-          icon: <AlertIcon className="w-7 h-7 text-destructive" />,
+          icon: <AlertIcon className="w-6 h-6 text-destructive" />,
           findingsText: 'text-destructive'
         };
     }
@@ -89,6 +71,8 @@ export const Report: React.FC<ReportProps> = ({ data, onReset }) => {
 
   const ratingStyles = getRatingStyles(data.formRating.level);
   const feedbackStyles = getFeedbackStyles(data.error.feedbackType);
+  const strokeDasharray = 2 * Math.PI * 44;
+  const strokeDashoffset = strokeDasharray * (1 - data.formRating.formScore / 100);
 
 
   return (
@@ -104,44 +88,92 @@ export const Report: React.FC<ReportProps> = ({ data, onReset }) => {
             </button>
         </div>
 
-        <div className={`rounded-lg p-4 sm:p-5 shadow-md my-6 flex items-start sm:items-center gap-4 border ${ratingStyles.container}`}>
-            <div className={`p-3 rounded-full ${ratingStyles.iconBg}`}>
-                <GaugeIcon className={`w-8 h-8 ${ratingStyles.iconColor}`} />
+        <div className={`rounded-xl p-6 shadow-md my-6 flex flex-col sm:flex-row items-center gap-4 sm:gap-6 border ${ratingStyles.container}`}>
+            <div className="flex-shrink-0 relative">
+                <svg className="w-24 h-24 transform -rotate-90" viewBox="0 0 100 100">
+                    <circle cx="50" cy="50" r="44" stroke="currentColor" strokeWidth="8" fill="transparent" className="opacity-20" />
+                    <circle
+                        cx="50"
+                        cy="50"
+                        r="44"
+                        stroke="currentColor"
+                        strokeWidth="8"
+                        fill="transparent"
+                        strokeDasharray={strokeDasharray}
+                        strokeDashoffset={strokeDashoffset}
+                        strokeLinecap="round"
+                        style={{ transition: 'stroke-dashoffset 1s ease-out' }}
+                    />
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center">
+                    <span className={`text-3xl font-bold ${ratingStyles.iconColor}`}>{data.formRating.formScore}</span>
+                </div>
             </div>
-            <div>
-                <p className="text-sm font-medium text-muted-foreground">Overall Form Rating</p>
-                <h2 className="text-2xl font-bold">
+            <div className="text-center sm:text-left">
+                <p className={`text-sm font-medium uppercase tracking-wider ${ratingStyles.iconColor} opacity-80`}>Overall Form Score</p>
+                <h2 className="text-3xl font-bold mt-1">
                     {data.formRating.level}
-                    <span className="text-muted-foreground font-normal text-lg ml-2">({data.formRating.formScore}/100)</span>
                 </h2>
-                <p className="text-sm text-muted-foreground mt-1">{data.formRating.justification}</p>
+                <p className={`text-sm opacity-80 mt-2 max-w-md ${ratingStyles.iconColor}`}>{data.formRating.justification}</p>
             </div>
         </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         
         {/* Left Column */}
-        <div className="lg:col-span-3 space-y-6">
-            <div className="bg-card border border-border rounded-xl p-4 sm:p-6 shadow-sm">
-                <div className={`flex items-center mb-3 ${feedbackStyles.text}`}>
-                    {feedbackStyles.icon}
-                    <h2 className="text-2xl font-bold ml-3">{data.error.title}</h2>
-                    <span className={`ml-auto text-sm font-mono px-2 py-1 rounded flex items-center ${feedbackStyles.iconBg} ${feedbackStyles.text}`}>
-                        <ClockIcon className="w-4 h-4 mr-1.5" />
-                        {data.error.timestamp}
-                    </span>
-                </div>
-                <div className="w-full max-w-lg mx-auto">
-                    <div>
-                        <p className="font-semibold text-center mb-2 text-foreground">Area for Improvement</p>
-                        <div className="relative rounded-lg overflow-hidden border border-border bg-black flex justify-center items-center">
-                            <img src={data.error.imageSrc} alt="Exercise frame with feedback" className="max-w-full max-h-[50vh] object-contain" />
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div className="space-y-6">
+          <AccordionItem title="Primary Feedback" icon={feedbackStyles.icon} defaultOpen={true}>
+              <div className="space-y-4">
+                  <div className="relative rounded-lg overflow-hidden border border-border bg-black flex justify-center items-center mb-4">
+                      <img src={data.error.imageSrc} alt="Exercise frame with feedback" className="max-w-full max-h-[40vh] object-contain" />
+                      <span className={`absolute top-2 right-2 text-xs font-mono px-2 py-1 rounded flex items-center bg-card/80 backdrop-blur-sm ${feedbackStyles.text}`}>
+                          <ClockIcon className="w-3 h-3 mr-1.5" />
+                          {data.error.timestamp}
+                      </span>
+                  </div>
 
-            <ReportCard title="Performance Breakdown" icon={<GaugeIcon className="w-6 h-6 text-primary" />}>
+                  <div>
+                      <p className="text-sm text-muted-foreground font-medium">Finding</p>
+                      <p className={`font-semibold ${feedbackStyles.findingsText}`}>{data.findings.errorName}</p>
+                  </div>
+                  <div>
+                      <p className="text-sm text-muted-foreground font-medium">Description</p>
+                      <p className="text-sm text-muted-foreground">{data.findings.description}</p>
+                  </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground font-medium">Analysis Confidence</p>
+                      <p className="font-mono text-lg text-green-500">{data.findings.confidence}</p>
+                  </div>
+                  <div>
+                      <p className="text-sm text-muted-foreground font-medium">Affected Joints</p>
+                      <div className="flex flex-wrap gap-2 mt-1">
+                          {data.findings.affectedJoints.map((joint) => (
+                              <span key={joint} className="text-xs font-medium bg-yellow-500/10 text-yellow-400 px-2 py-1 rounded-full">{joint}</span>
+                          ))}
+                      </div>
+                  </div>
+              </div>
+          </AccordionItem>
+          
+          <AccordionItem title={data.correctionPlan.title} icon={<CheckIcon className="w-6 h-6 text-green-500" />} defaultOpen={true}>
+                <div className="space-y-4">
+                  {data.correctionPlan.steps.map((step, index) => (
+                      <div key={index}>
+                          <p className="font-semibold text-primary">{step.title}</p>
+                          <p className="text-muted-foreground text-sm">{step.description}</p>
+                      </div>
+                  ))}
+              </div>
+          </AccordionItem>
+
+          <AccordionItem title={data.rationale.title} icon={<InfoIcon className="w-6 h-6 text-yellow-500" />}>
+              <p className="text-muted-foreground text-sm">{data.rationale.text}</p>
+          </AccordionItem>
+        </div>
+
+        {/* Right Column */}
+        <div className="space-y-6">
+            <AccordionItem title="Performance Breakdown" icon={<GaugeIcon className="w-6 h-6 text-primary" />}>
                 <div className="space-y-5">
                     {data.formRating.detailedScores.map((item, index) => (
                         <div key={index}>
@@ -156,53 +188,11 @@ export const Report: React.FC<ReportProps> = ({ data, onReset }) => {
                         </div>
                     ))}
                 </div>
-            </ReportCard>
+            </AccordionItem>
 
-            <ReportCard title={data.correctionPlan.title} icon={<CheckIcon className="w-6 h-6 text-green-500" />}>
-                 <div className="space-y-4">
-                    {data.correctionPlan.steps.map((step, index) => (
-                        <div key={index}>
-                            <p className="font-semibold text-primary">{step.title}</p>
-                            <p className="text-muted-foreground text-sm">{step.description}</p>
-                        </div>
-                    ))}
-                </div>
-            </ReportCard>
-        </div>
-
-        {/* Right Column */}
-        <div className="lg:col-span-2 space-y-6">
-            <ReportCard title={data.positiveReinforcement.title} icon={<FormCheckIcon className="w-6 h-6 text-primary" />}>
+            <AccordionItem title={data.positiveReinforcement.title} icon={<FormCheckIcon className="w-6 h-6 text-primary" />}>
                 <p className="text-muted-foreground text-sm">{data.positiveReinforcement.text}</p>
-            </ReportCard>
-            <ReportCard title="Specific Findings" icon={<InfoIcon className="w-6 h-6 text-yellow-500" />}>
-                <div className="space-y-4">
-                    <div>
-                        <p className="text-sm text-muted-foreground font-medium">Feedback</p>
-                        <p className={`font-semibold ${feedbackStyles.findingsText}`}>{data.findings.errorName}</p>
-                    </div>
-                    <div>
-                        <p className="text-sm text-muted-foreground font-medium">Description</p>
-                        <p className="text-sm text-muted-foreground">{data.findings.description}</p>
-                    </div>
-                     <div>
-                        <p className="text-sm text-muted-foreground font-medium">Analysis Confidence</p>
-                        <p className="font-mono text-lg text-green-500">{data.findings.confidence}</p>
-                    </div>
-                    <div>
-                        <p className="text-sm text-muted-foreground font-medium">Affected Joints</p>
-                        <div className="flex flex-wrap gap-2 mt-1">
-                            {data.findings.affectedJoints.map((joint) => (
-                                <span key={joint} className="text-xs font-medium bg-yellow-500/10 text-yellow-400 px-2 py-1 rounded-full">{joint}</span>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            </ReportCard>
-            
-             <ReportCard title={data.rationale.title} icon={<AlertIcon className="w-6 h-6 text-destructive" />}>
-                <p className="text-muted-foreground text-sm">{data.rationale.text}</p>
-            </ReportCard>
+            </AccordionItem>
         </div>
       </div>
     </div>
