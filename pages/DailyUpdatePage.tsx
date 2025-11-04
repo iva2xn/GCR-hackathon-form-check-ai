@@ -103,7 +103,6 @@ export const DailyUpdatePage: React.FC = () => {
         try {
             const imageBase64 = await fileToBase64(imageFile);
             const newUpdate = {
-                id: Date.now(),
                 date: new Date().toISOString(),
                 imageBase64,
                 weight: parseFloat(weight),

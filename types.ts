@@ -45,7 +45,7 @@ export interface ReportData {
 }
 
 export interface DailyUpdate {
-    id: number;
+    id?: number;
     date: string;
     imageBase64: string;
     weight: number;
