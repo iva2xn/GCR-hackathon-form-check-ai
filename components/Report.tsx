@@ -1,6 +1,6 @@
 import React from 'react';
 import type { ReportData } from '../types';
-import { AlertIcon, CheckIcon, GaugeIcon, InfoIcon, RestartIcon, TrophyIcon, ClockIcon } from './icons';
+import { AlertIcon, CheckIcon, GaugeIcon, InfoIcon, RestartIcon, TrophyIcon, ClockIcon, FormCheckIcon } from './icons';
 
 interface ReportProps {
   data: ReportData;
@@ -172,7 +172,7 @@ export const Report: React.FC<ReportProps> = ({ data, onReset }) => {
 
         {/* Right Column */}
         <div className="lg:col-span-2 space-y-6">
-            <ReportCard title={data.positiveReinforcement.title} icon={<TrophyIcon className="w-6 h-6 text-primary" />}>
+            <ReportCard title={data.positiveReinforcement.title} icon={<FormCheckIcon className="w-6 h-6 text-primary" />}>
                 <p className="text-muted-foreground text-sm">{data.positiveReinforcement.text}</p>
             </ReportCard>
             <ReportCard title="Specific Findings" icon={<InfoIcon className="w-6 h-6 text-yellow-500" />}>
