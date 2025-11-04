@@ -1,4 +1,3 @@
-
 export type AppStatus = 'idle' | 'loading' | 'report' | 'error';
 
 export interface ScoreDetail {
@@ -43,6 +42,14 @@ export interface ReportData {
     justification: string; // Overall justification from AI
     detailedScores: ScoreDetail[];
   };
+}
+
+export interface DailyUpdate {
+    id: number;
+    date: string;
+    imageBase64: string;
+    protein: number;
+    muscleGroup: string;
 }
 
 // FIX: Add missing Point and SkeletonData types for SkeletonOverlay component.

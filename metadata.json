@@ -1,5 +1,5 @@
 {
-  "name": "FormCheck AI",
-  "description": "An AI-powered application that analyzes exercise form from user-uploaded videos, providing detailed feedback and actionable corrections to improve safety and performance.",
+  "name": "FitTrack AI",
+  "description": "An AI-powered fitness application to analyze your exercise form, track daily progress, and help you achieve your performance goals safely.",
   "requestFramePermissions": []
 }
