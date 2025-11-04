@@ -1,6 +1,5 @@
-
 import React, { useRef, useState, useEffect } from 'react';
-import { UploadIcon, PlayIcon, PauseIcon } from './icons';
+import { UploadIcon, PlayIcon, PauseIcon, VolumeUpIcon, VolumeOffIcon } from './icons';
 
 interface FileUploadProps {
   onFileSelect: (file: File) => void;
@@ -31,6 +30,18 @@ export const FileUpload: React.FC<FileUploadProps> = ({
   const [isDraggingHandle, setIsDraggingHandle] = useState<'start' | 'end' | null>(null);
   const [isPreviewPlaying, setIsPreviewPlaying] = useState(false);
   const [currentPlaybackTime, setCurrentPlaybackTime] = useState(0);
+  const [volume, setVolume] = useState(0.75);
+  const [isMuted, setIsMuted] = useState(false);
+  const [lastVolume, setLastVolume] = useState(0.75);
+  const [playbackRate, setPlaybackRate] = useState(1);
+  const playbackRates = [0.5, 0.75, 1, 1.5, 2];
+
+  const formatTime = (timeInSeconds: number) => {
+      const totalSeconds = Math.floor(timeInSeconds);
+      const minutes = Math.floor(totalSeconds / 60);
+      const seconds = totalSeconds % 60;
+      return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+  };
 
   const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -118,10 +129,10 @@ export const FileUpload: React.FC<FileUploadProps> = ({
     if (!video) return;
 
     if (video.paused) {
-      // Set the current time to the start of the clip before playing
-      video.currentTime = startTime;
+      if (video.currentTime < startTime || video.currentTime >= endTime) {
+          video.currentTime = startTime;
+      }
       video.play().catch(error => {
-        // The play() request might be interrupted by user actions, which is fine.
         if (error.name !== 'AbortError') {
           console.error("Video playback failed:", error);
         }
@@ -129,6 +140,58 @@ export const FileUpload: React.FC<FileUploadProps> = ({
     } else {
       video.pause();
     }
+  };
+  
+  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newVolume = parseFloat(e.target.value);
+    setVolume(newVolume);
+    setIsMuted(newVolume === 0);
+    if (videoRef.current) {
+        videoRef.current.volume = newVolume;
+        videoRef.current.muted = newVolume === 0;
+    }
+  };
+
+  const toggleMute = () => {
+      const video = videoRef.current;
+      if (!video) return;
+
+      if (video.muted || volume === 0) {
+          const newVolume = lastVolume > 0 ? lastVolume : 0.5;
+          setVolume(newVolume);
+          setIsMuted(false);
+          video.volume = newVolume;
+          video.muted = false;
+      } else {
+          setLastVolume(volume);
+          setVolume(0);
+          setIsMuted(true);
+          video.volume = 0;
+          video.muted = true;
+      }
+  };
+  
+  const handlePlaybackRateChange = () => {
+      const currentIndex = playbackRates.indexOf(playbackRate);
+      const nextIndex = (currentIndex + 1) % playbackRates.length;
+      const newRate = playbackRates[nextIndex];
+      setPlaybackRate(newRate);
+      if (videoRef.current) {
+          videoRef.current.playbackRate = newRate;
+      }
+  };
+
+  const handleTimelineClick = (e: React.MouseEvent<HTMLDivElement>) => {
+      if (!timelineRef.current || !videoRef.current) return;
+      const timelineRect = timelineRef.current.getBoundingClientRect();
+      const clickX = e.clientX - timelineRect.left;
+      const percentage = clickX / timelineRect.width;
+      const newTime = percentage * videoDuration;
+
+      // Ensure the seeked time is within the selected clip for continuous play
+      const clampedTime = Math.max(startTime, Math.min(newTime, endTime));
+      videoRef.current.currentTime = clampedTime;
+      setCurrentPlaybackTime(clampedTime);
   };
 
   useEffect(() => {
@@ -158,9 +221,8 @@ export const FileUpload: React.FC<FileUploadProps> = ({
     if (!video) return;
 
     const onTimeUpdate = () => {
-      if (video) { // Check if video still exists
+      if (video) {
         setCurrentPlaybackTime(video.currentTime);
-        // Loop the video when it reaches the end of the selected range.
         if (!video.paused && video.currentTime >= endTime) {
           video.currentTime = startTime;
         }
@@ -174,18 +236,24 @@ export const FileUpload: React.FC<FileUploadProps> = ({
     video.addEventListener('pause', onPause);
 
     return () => {
-      video.removeEventListener('timeupdate', onTimeUpdate);
-      video.removeEventListener('play', onPlay);
-      video.removeEventListener('pause', onPause);
+      if (video) {
+        video.removeEventListener('timeupdate', onTimeUpdate);
+        video.removeEventListener('play', onPlay);
+        video.removeEventListener('pause', onPause);
+      }
     };
   }, [startTime, endTime]);
   
-  // Reset playback time when file changes
+  // Set initial video properties and reset playback time when file changes
   useEffect(() => {
-    if (file) {
-      setCurrentPlaybackTime(startTime);
+    const video = videoRef.current;
+    if (video) {
+        setCurrentPlaybackTime(startTime);
+        video.volume = volume;
+        video.muted = isMuted;
+        video.playbackRate = playbackRate;
     }
-  }, [file, startTime])
+  }, [file, startTime]);
 
   const clipDuration = endTime - startTime;
 
@@ -196,7 +264,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
       </h2>
       <p className="text-muted-foreground mb-6 sm:mb-8 max-w-lg mx-auto">
         {file
-          ? 'Use the timeline to select a 10-second clip. Hover over the video to play the selected loop.'
+          ? 'Use the timeline to select a 10-second clip, then use the player controls to review.'
           : 'Upload a video of your workout. Our AI will analyze your movement, detect critical errors, and provide actionable feedback to improve your form and prevent injury.'}
       </p>
 
@@ -207,14 +275,14 @@ export const FileUpload: React.FC<FileUploadProps> = ({
               Clip: {clipDuration.toFixed(2)}s / 10.00s
             </div>
           </div>
-          <div className="relative group bg-black rounded-md overflow-hidden cursor-pointer" onClick={handlePreviewToggle}>
+          <div className="relative group bg-black rounded-t-md overflow-hidden">
             <video 
               ref={videoRef} 
               src={videoUrl} 
               playsInline
-              muted
               preload="auto"
               className="w-full aspect-video"
+              onClick={handlePreviewToggle}
             >
             </video>
             
@@ -229,8 +297,38 @@ export const FileUpload: React.FC<FileUploadProps> = ({
             </div>
           </div>
           
+          <div className="bg-muted p-2 rounded-b-md flex items-center gap-3 text-muted-foreground select-none">
+              <button onClick={handlePreviewToggle} className="p-1.5 hover:text-foreground transition-colors">
+                  {isPreviewPlaying ? <PauseIcon className="w-5 h-5" /> : <PlayIcon className="w-5 h-5" />}
+              </button>
+              <div className="flex items-center gap-2 group">
+                  <button onClick={toggleMute} className="p-1.5 hover:text-foreground transition-colors">
+                      {isMuted || volume === 0 ? <VolumeOffIcon className="w-5 h-5" /> : <VolumeUpIcon className="w-5 h-5" />}
+                  </button>
+                  <input
+                      type="range"
+                      min="0"
+                      max="1"
+                      step="0.05"
+                      value={volume}
+                      onChange={handleVolumeChange}
+                      className="w-0 sm:w-20 cursor-pointer accent-primary transition-all duration-300 opacity-0 sm:opacity-100 group-hover:w-20 group-hover:opacity-100"
+                      aria-label="Volume control"
+                  />
+              </div>
+              <div className="text-xs font-mono flex-grow text-left sm:text-center">
+                  {formatTime(currentPlaybackTime)} / {formatTime(videoDuration)}
+              </div>
+              <button
+                  onClick={handlePlaybackRateChange}
+                  className="text-xs font-mono font-semibold p-1 px-2 rounded hover:bg-secondary hover:text-secondary-foreground transition-colors w-14"
+              >
+                  {playbackRate.toFixed(2)}x
+              </button>
+          </div>
+
           <div className="relative pt-8 pb-4 px-3 select-none">
-            <div ref={timelineRef} className="relative w-full h-2 bg-muted rounded-full cursor-pointer">
+            <div ref={timelineRef} onClick={handleTimelineClick} className="relative w-full h-2 bg-muted rounded-full cursor-pointer">
               <div 
                 className="absolute top-0 h-2 bg-primary/50"
                 style={{
@@ -250,15 +348,19 @@ export const FileUpload: React.FC<FileUploadProps> = ({
                 className="absolute -top-2 w-6 h-6 rounded-full bg-primary border-4 border-card shadow cursor-grab active:cursor-grabbing z-30"
                 style={{ left: `calc(${(startTime / videoDuration) * 100}% - 12px)` }}
                 onMouseDown={() => handleMouseDown('start')}
+                aria-label="Start time handle"
+                role="slider"
               ></div>
               <div
                 className="absolute -top-2 w-6 h-6 rounded-full bg-primary border-4 border-card shadow cursor-grab active:cursor-grabbing z-30"
                 style={{ left: `calc(${(endTime / videoDuration) * 100}% - 12px)` }}
                 onMouseDown={() => handleMouseDown('end')}
+                aria-label="End time handle"
+                role="slider"
               ></div>
             </div>
             <div className="flex justify-between text-xs text-muted-foreground mt-2 font-mono">
-              <span>{startTime.toFixed(2)}s</span>
+              <span>0.00s</span>
               <span>{videoDuration.toFixed(2)}s</span>
             </div>
           </div>

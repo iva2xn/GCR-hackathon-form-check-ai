@@ -1,4 +1,3 @@
-
 import React from 'react';
 import type { ReportData } from '../types';
 import { AlertIcon, CheckIcon, GaugeIcon, InfoIcon, RestartIcon, TrophyIcon, ClockIcon } from './icons';
@@ -59,38 +58,30 @@ export const Report: React.FC<ReportProps> = ({ data, onReset }) => {
     switch (feedbackType) {
       case 'error':
         return {
-          container: 'border-destructive/50 shadow-destructive/10',
           text: 'text-destructive',
           iconBg: 'bg-destructive/10',
           icon: <AlertIcon className="w-7 h-7 text-destructive" />,
-          border: 'border-destructive/30',
           findingsText: 'text-destructive'
         };
       case 'refinement':
         return {
-          container: 'border-yellow-500/50 shadow-yellow-500/10',
           text: 'text-yellow-400',
           iconBg: 'bg-yellow-500/10',
           icon: <InfoIcon className="w-7 h-7 text-yellow-500" />,
-          border: 'border-yellow-500/30',
           findingsText: 'text-yellow-400'
         };
       case 'optimization':
         return {
-          container: 'border-primary/50 shadow-primary/10',
           text: 'text-primary',
           iconBg: 'bg-primary/10',
           icon: <TrophyIcon className="w-7 h-7 text-primary" />,
-          border: 'border-primary/30',
           findingsText: 'text-primary'
         };
       default:
           return {
-          container: 'border-destructive/50 shadow-destructive/10',
           text: 'text-destructive',
           iconBg: 'bg-destructive/10',
           icon: <AlertIcon className="w-7 h-7 text-destructive" />,
-          border: 'border-destructive/30',
           findingsText: 'text-destructive'
         };
     }
@@ -131,7 +122,7 @@ export const Report: React.FC<ReportProps> = ({ data, onReset }) => {
         
         {/* Left Column */}
         <div className="lg:col-span-3 space-y-6">
-            <div className={`bg-card border rounded-xl p-4 sm:p-6 shadow-md ${feedbackStyles.container}`}>
+            <div className="bg-card border border-border rounded-xl p-4 sm:p-6 shadow-sm">
                 <div className={`flex items-center mb-3 ${feedbackStyles.text}`}>
                     {feedbackStyles.icon}
                     <h2 className="text-2xl font-bold ml-3">{data.error.title}</h2>
@@ -140,8 +131,13 @@ export const Report: React.FC<ReportProps> = ({ data, onReset }) => {
                         {data.error.timestamp}
                     </span>
                 </div>
-                <div className={`relative rounded-lg overflow-hidden border-2 ${feedbackStyles.border}`}>
-                    <img src={data.error.imageSrc} alt="Exercise frame with feedback" className="w-full h-auto" />
+                <div className="w-full max-w-lg mx-auto">
+                    <div>
+                        <p className="font-semibold text-center mb-2 text-foreground">Area for Improvement</p>
+                        <div className="relative rounded-lg overflow-hidden border border-border bg-black flex justify-center items-center">
+                            <img src={data.error.imageSrc} alt="Exercise frame with feedback" className="max-w-full max-h-[50vh] object-contain" />
+                        </div>
+                    </div>
                 </div>
             </div>
 

@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { GoogleGenAI, Type } from "@google/genai";
+import { GoogleGenAI, Type, Modality } from "@google/genai";
 import { FileUpload } from './components/FileUpload';
 import { LoadingSpinner } from './components/LoadingSpinner';
 import { Report } from './components/Report';
@@ -137,7 +137,7 @@ const App: React.FC = () => {
    - If the form is excellent, acknowledge this and provide a tip for advanced optimization or variation.
 3. Identify the single best aspect of the user's form that they should continue doing.
 4. Provide a detailed analysis and a step-by-step correction or refinement plan for the main point of feedback.
-5. Select the single frame from the sequence (index 0 to ${NUM_FRAMES - 1}) that best illustrates your main feedback point (whether it's an error, a refinement, or a moment of good form to optimize) and specify its index.
+5. Select the single frame from the sequence (index 0 to ${NUM_FRAMES - 1}) that best illustrates your main feedback point and specify its index.
 6. Provide a detailed performance breakdown. For each of the following metrics, provide a score from 0 to 10 (where 10 is perfect) and a brief justification. Be realistic and constructive in your scoring. Scores of 9-10 should be reserved for textbook execution.
     - Spinal Alignment: Assess the neutrality of the spine throughout the movement.
     - Joint Stability: Assess the stability of key joints like knees, hips, and shoulders.
@@ -155,21 +155,19 @@ You must return your response in a JSON format that adheres to the provided sche
       
       const analysisSteps = [
         'AI coach is analyzing your movement patterns...',
-        'Identifying key joint angles and positions...',
-        'Evaluating spinal and pelvic alignment...',
-        'Assessing joint stability and control...',
-        'Checking range of motion and tempo...',
         'Comparing your form against ideal biomechanics...',
         'Pinpointing the most critical area for improvement...',
+        'Creating your personalized correction plan...'
       ];
       let stepIndex = 0;
       setLoadingMessage(analysisSteps[stepIndex]);
       analysisInterval = window.setInterval(() => {
           stepIndex = (stepIndex + 1) % analysisSteps.length;
           setLoadingMessage(analysisSteps[stepIndex]);
-      }, 2500);
+      }, 3000);
 
-      const response = await ai.models.generateContent({
+      // --- Step 1: Get Text Analysis ---
+      const analysisResponse = await ai.models.generateContent({
         model: 'gemini-2.5-flash',
         contents: { parts: [{ text: prompt }, ...imageParts] },
         config: {
@@ -182,8 +180,7 @@ You must return your response in a JSON format that adheres to the provided sche
       clearInterval(analysisInterval);
       analysisInterval = undefined;
 
-      setLoadingMessage('Compiling findings and correction plan...');
-      const cleanedText = response.text
+      const cleanedText = analysisResponse.text
         .trim()
         .replace(/^```json\s*/, '')
         .replace(/\s*```$/, '');
@@ -192,18 +189,31 @@ You must return your response in a JSON format that adheres to the provided sche
       try {
         report = JSON.parse(cleanedText);
       } catch (parseError) {
-        console.error("Failed to parse JSON response from API.");
-        console.error("Raw response:", response.text);
-        console.error("Cleaned text:", cleanedText);
-        console.error("Parsing error:", parseError);
+        console.error("Failed to parse JSON response from API:", parseError);
         throw new Error("The AI returned a response with an invalid format.");
       }
       
       if (!report || !report.error || !report.error.feedbackType || !report.formRating || !report.formRating.detailedScores || report.formRating.detailedScores.length === 0) {
-        console.error("Malformed report data from API, missing key fields like 'error', 'error.feedbackType' or 'formRating.detailedScores'.", report);
         throw new Error("The AI returned an incomplete report. Please try again.");
       }
+
+      // Calculate accurate timestamp based on clip selection and frame index
+      const clipDuration = endTime - startTime;
+      const frameTimeInClip = (report.error.errorFrameIndex / NUM_FRAMES) * clipDuration;
+      const absoluteFrameTime = startTime + frameTimeInClip;
+      const minutes = Math.floor(absoluteFrameTime / 60);
+      const seconds = Math.floor(absoluteFrameTime % 60);
+      report.error.timestamp = `@ ${minutes}:${seconds.toString().padStart(2, '0')}`;
       
+      setLoadingMessage('Finalizing your report...');
+      
+      const errorFrameIndex = report.error.errorFrameIndex ?? Math.floor(NUM_FRAMES / 2);
+      const safeFrameIndex = Math.max(0, Math.min(frames.length - 1, errorFrameIndex));
+      const errorFrameData = frames[safeFrameIndex];
+
+      // --- Step 2: Compile final report ---
+      report.error.imageSrc = `data:${errorFrameData.mimeType};base64,${errorFrameData.frame}`;
+
       const getLevelFromScore = (score: number): string => {
         if (score < 40) return 'Needs Improvement';
         if (score < 75) return 'Good';
@@ -214,16 +224,7 @@ You must return your response in a JSON format that adheres to the provided sche
       const totalScore = report.formRating.detailedScores.reduce((sum: number, item: ScoreDetail) => sum + item.score, 0);
       const averageScore = totalScore / report.formRating.detailedScores.length;
       report.formRating.formScore = Math.round(averageScore * 10);
-      
       report.formRating.level = getLevelFromScore(report.formRating.formScore);
-
-      setLoadingMessage('Finalizing your report...');
-      const errorFrameIndex = report.error.errorFrameIndex ?? Math.floor(NUM_FRAMES / 2);
-      
-      const safeFrameIndex = Math.max(0, Math.min(frames.length - 1, errorFrameIndex));
-
-      const errorFrameData = frames[safeFrameIndex];
-      report.error.imageSrc = `data:${errorFrameData.mimeType};base64,${errorFrameData.frame}`;
 
       setReportData(report as ReportData);
       setStatus('report');
@@ -299,7 +300,6 @@ You must return your response in a JSON format that adheres to the provided sche
 };
 
 export default App;
-
 
 // Gemini response schema definition
 const reportDataSchema = {

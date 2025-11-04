@@ -1,3 +1,4 @@
+
 export type AppStatus = 'idle' | 'loading' | 'report' | 'error';
 
 export interface ScoreDetail {
@@ -44,7 +45,7 @@ export interface ReportData {
   };
 }
 
-// FIX: Add Point and SkeletonData types for SkeletonOverlay component.
+// FIX: Add missing Point and SkeletonData types for SkeletonOverlay component.
 export interface Point {
   x: number;
   y: number;

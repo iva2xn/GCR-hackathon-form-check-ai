@@ -1,5 +1,5 @@
+
 import React from 'react';
-// FIX: Add Point to type import to be used in the component.
 import type { Point, SkeletonData } from '../types';
 
 interface SkeletonOverlayProps {
@@ -50,7 +50,6 @@ export const SkeletonOverlay: React.FC<SkeletonOverlayProps> = ({ skeleton }) =>
       })}
 
       {/* Draw keypoints */}
-      {/* FIX: Explicitly type `point` as `Point` to resolve error where it was inferred as `unknown`. */}
       {Object.values(keypoints).map((point: Point, index) => (
         <circle
           key={`point-${index}`}
