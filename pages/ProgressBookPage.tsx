@@ -15,17 +15,17 @@ const PageCover = forwardRef<HTMLDivElement, { children: React.ReactNode }>(({ c
 });
 
 
-const Page = forwardRef<HTMLDivElement, { children: React.ReactNode, number: number }>(({ children, number }, ref) => {
+const Page = forwardRef<HTMLDivElement, { children: React.ReactNode, number: number, width: number }>(({ children, number, width }, ref) => {
     return (
         <div 
-            className="bg-[#ffffe0] text-gray-800 p-8 flex flex-col relative [--page-line-color:#60a5fa] dark:[--page-line-color:#64748b]" 
+            className="bg-[#ffffe0] text-gray-800 p-8 flex flex-col relative [--page-line-color:#60a5fa] dark:[--page-line-color:#64748b] overflow-hidden" 
             ref={ref}
         >
             <div 
                 className="absolute inset-0 pointer-events-none" 
                 style={{
                     backgroundImage: 'repeating-linear-gradient(to bottom, transparent 0, transparent 27px, var(--page-line-color) 28px)',
-                    backgroundSize: '100% 28px',
+                    backgroundSize: `${width}px 28px`,
                 }}
             ></div>
             
@@ -103,7 +103,8 @@ export const ProgressBookPage: React.FC = () => {
     const AnyHTMLFlipBook = HTMLFlipBook as any;
 
     return (
-        <div ref={containerRef} className="w-full flex justify-center items-center animate-fade-in" style={{ minHeight: `${bookSize.height + 40}px` }}>
+        <div ref={containerRef} className="w-full flex justify-center items-center animate-fade-in relative" style={{ minHeight: `${bookSize.height + 40}px` }}>
+            <div className="absolute top-0 bottom-0 w-px bg-gray-300 dark:bg-gray-700 shadow-md" style={{ left: '50%', transform: 'translateX(-0.5px)', zIndex: 10 }}></div>
             <AnyHTMLFlipBook
                 width={bookSize.width} 
                 height={bookSize.height}
@@ -121,7 +122,7 @@ export const ProgressBookPage: React.FC = () => {
                 </PageCover>
 
                 {updates.map((update, index) => (
-                    <Page key={update.id} number={index + 1}>
+                    <Page key={update.id} number={index + 1} width={bookSize.width}>
                        <div className="h-full w-full flex flex-col justify-center items-center">
                             <div className="transform -rotate-2 hover:rotate-1 transition-transform duration-300 ease-in-out">
                                 <div className="bg-white dark:bg-gray-100 p-3 rounded-sm shadow-lg">
@@ -140,12 +141,11 @@ export const ProgressBookPage: React.FC = () => {
                             </div>
                             
                             <div 
-                                className="absolute w-full px-8 font-doodle text-2xl text-gray-700 transform -rotate-1"
-                                style={{ bottom: '56px' }}
+                                className="mt-[28px] font-doodle text-2xl text-gray-700 transform -rotate-1 text-center"
                             >
-                                <p className="font-bold">Weight: {update.weight} kg/lbs</p>
+                                <p className="font-bold leading-[28px] pt-[3px]">Weight: {update.weight} kg/lbs</p>
                                 {update.protein != null && (
-                                     <p className="font-bold mt-4">Protein: {update.protein}g</p>
+                                     <p className="font-bold leading-[28px] pt-[3px]">Protein: {update.protein}g</p>
                                 )}
                             </div>
                        </div>
