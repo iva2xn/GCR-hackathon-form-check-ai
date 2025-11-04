@@ -15,20 +15,16 @@ const PageCover = forwardRef<HTMLDivElement, { children: React.ReactNode }>(({ c
 });
 
 
-const Page = forwardRef<HTMLDivElement, { children: React.ReactNode, number: number, width: number }>(({ children, number, width }, ref) => {
+const Page = forwardRef<HTMLDivElement, { children: React.ReactNode, number: number }>(({ children, number }, ref) => {
     return (
         <div 
             className="bg-[#ffffe0] text-gray-800 p-8 flex flex-col relative [--page-line-color:#60a5fa] dark:[--page-line-color:#64748b] overflow-hidden" 
             ref={ref}
+            style={{
+                backgroundImage: 'repeating-linear-gradient(to bottom, transparent 0, transparent 27px, var(--page-line-color) 28px)',
+                backgroundSize: '100% 28px',
+            }}
         >
-            <div 
-                className="absolute inset-0 pointer-events-none" 
-                style={{
-                    backgroundImage: 'repeating-linear-gradient(to bottom, transparent 0, transparent 27px, var(--page-line-color) 28px)',
-                    backgroundSize: `${width}px 28px`,
-                }}
-            ></div>
-            
             <div className="relative z-10 flex-grow flex flex-col">{children}</div>
             <div className={`absolute bottom-2 z-10 text-xs text-gray-400 font-mono ${number % 2 === 0 ? 'right-4' : 'left-4'}`}>{number}</div>
         </div>
@@ -103,8 +99,7 @@ export const ProgressBookPage: React.FC = () => {
     const AnyHTMLFlipBook = HTMLFlipBook as any;
 
     return (
-        <div ref={containerRef} className="w-full flex justify-center items-center animate-fade-in relative" style={{ minHeight: `${bookSize.height + 40}px` }}>
-            <div className="absolute top-0 bottom-0 w-px bg-gray-300 dark:bg-gray-700 shadow-md" style={{ left: '50%', transform: 'translateX(-0.5px)', zIndex: 10 }}></div>
+        <div ref={containerRef} className="w-full flex justify-center items-center animate-fade-in" style={{ minHeight: `${bookSize.height}px` }}>
             <AnyHTMLFlipBook
                 width={bookSize.width} 
                 height={bookSize.height}
@@ -122,8 +117,8 @@ export const ProgressBookPage: React.FC = () => {
                 </PageCover>
 
                 {updates.map((update, index) => (
-                    <Page key={update.id} number={index + 1} width={bookSize.width}>
-                       <div className="h-full w-full flex flex-col justify-center items-center">
+                    <Page key={update.id} number={index + 1}>
+                       <div className="h-full w-full flex flex-col items-center pt-6">
                             <div className="transform -rotate-2 hover:rotate-1 transition-transform duration-300 ease-in-out">
                                 <div className="bg-white dark:bg-gray-100 p-3 rounded-sm shadow-lg">
                                     <img 
