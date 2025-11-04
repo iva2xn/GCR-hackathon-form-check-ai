@@ -119,8 +119,8 @@ export const CloseIcon: React.FC<{ className?: string }> = ({ className }) => (
 );
 
 export const DumbbellIcon: React.FC<{ className?: string }> = ({ className }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M6.828 6.828a4.5 4.5 0 016.364 0l2.828 2.829a4.5 4.5 0 010 6.364l-6.364 6.364a4.5 4.5 0 01-6.364-6.364l2.829-2.828-2.829-2.828a4.5 4.5 0 010-6.364z" />
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24" fill="currentColor">
+        <path d="M21.29 2.71a1 1 0 0 0-1.42 0l-5.38 5.38-1.59-1.59a2 2 0 0 0-2.82 0L8.5 8.09 2.71 2.29a1 1 0 0 0-1.42 1.42l5.8 5.8-1.59 1.59a2 2 0 0 0 0 2.82l1.59 1.59-5.8 5.8a1 1 0 0 0 1.42 1.42l5.79-5.8 1.59 1.59a2 2 0 0 0 2.82 0l1.59-1.59 5.38 5.38a1 1 0 0 0 1.42-1.42L15.91 15.5l1.59-1.59a2 2 0 0 0 0-2.82l-1.59-1.59 5.8-5.79a1 1 0 0 0 0-1.42z" />
     </svg>
 );
 
@@ -134,5 +134,11 @@ export const CameraIcon: React.FC<{ className?: string }> = ({ className }) => (
 export const ArrowLeftIcon: React.FC<{ className?: string }> = ({ className }) => (
     <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+    </svg>
+);
+
+export const BookOpenIcon: React.FC<{ className?: string }> = ({ className }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
     </svg>
 );

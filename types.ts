@@ -48,8 +48,8 @@ export interface DailyUpdate {
     id: number;
     date: string;
     imageBase64: string;
-    protein: number;
-    muscleGroup: string;
+    weight: number;
+    protein?: number;
 }
 
 // FIX: Add missing Point and SkeletonData types for SkeletonOverlay component.

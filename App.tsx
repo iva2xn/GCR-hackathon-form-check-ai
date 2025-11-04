@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import { LandingPage } from './pages/LandingPage';
 import { FormCheckerPage } from './pages/FormCheckerPage';
 import { DailyUpdatePage } from './pages/DailyUpdatePage';
+import { ProgressBookPage } from './pages/ProgressBookPage';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 
-export type Page = 'landing' | 'form-checker' | 'daily-update';
+export type Page = 'landing' | 'form-checker' | 'daily-update' | 'progress-book';
 
 const App: React.FC = () => {
     const [currentPage, setCurrentPage] = useState<Page>('landing');
@@ -20,6 +21,8 @@ const App: React.FC = () => {
                 return <FormCheckerPage />;
             case 'daily-update':
                 return <DailyUpdatePage />;
+            case 'progress-book':
+                return <ProgressBookPage />;
             case 'landing':
             default:
                 return <LandingPage onNavigate={navigate} />;

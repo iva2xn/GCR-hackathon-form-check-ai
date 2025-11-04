@@ -1,6 +1,6 @@
 import React from 'react';
 import type { Page } from '../App';
-import { FormCheckIcon, DumbbellIcon } from '../components/icons';
+import { FormCheckIcon, DumbbellIcon, BookOpenIcon } from '../components/icons';
 
 interface LandingPageProps {
     onNavigate: (page: Page) => void;
@@ -11,10 +11,11 @@ const FeatureCard: React.FC<{
     title: string;
     description: string;
     onClick: () => void;
-}> = ({ icon, title, description, onClick }) => (
+    className?: string;
+}> = ({ icon, title, description, onClick, className = '' }) => (
     <button
         onClick={onClick}
-        className="w-full bg-card rounded-xl border border-border shadow-sm p-6 text-left flex flex-col items-start transition-all duration-300 hover:shadow-lg hover:border-primary/50 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
+        className={`w-full bg-card rounded-xl border border-border shadow-sm p-6 text-left flex flex-col items-start transition-all duration-300 hover:shadow-lg hover:border-primary/50 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background ${className}`}
     >
         <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
             {icon}
@@ -38,17 +39,24 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                 Your personal AI-powered companion for smarter training, precise form correction, and consistent progress tracking.
             </p>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 max-w-4xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 max-w-6xl mx-auto">
                 <FeatureCard
                     icon={<FormCheckIcon className="w-7 h-7 text-primary" />}
                     title="Analyze Your Form"
                     description="Get instant, AI-powered feedback on your exercise technique to maximize gains and prevent injury. Upload a video and let our AI do the rest."
                     onClick={() => onNavigate('form-checker')}
                 />
+                 <FeatureCard
+                    icon={<BookOpenIcon className="w-7 h-7 text-primary" />}
+                    title="View Your Progress Book"
+                    description="Flip through your fitness journey. Review past entries, photos, and milestones in an interactive digital journal."
+                    onClick={() => onNavigate('progress-book')}
+                    className="md:col-span-2 lg:col-span-1"
+                />
                 <FeatureCard
                     icon={<DumbbellIcon className="w-7 h-7 text-primary" />}
-                    title="Track Your Progress"
-                    description="Log your daily wins, from nutrition to workouts. Upload a progress photo and record your protein intake and muscle group trained."
+                    title="Track Your Daily Progress"
+                    description="Log your daily wins. Upload a progress photo, record your weight, and optionally add your protein intake to stay accountable."
                     onClick={() => onNavigate('daily-update')}
                 />
             </div>
