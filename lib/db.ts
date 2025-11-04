@@ -3,7 +3,7 @@ import type { HistoryReportData } from '../pages/FormCheckerPage';
 import type { DailyUpdate } from '../types';
 
 const DB_NAME = 'FitTrackDB';
-const DB_VERSION = 2; // Incremented version to trigger schema upgrade
+const DB_VERSION = 3; // Incremented version to trigger schema upgrade
 const REPORTS_STORE_NAME = 'reports';
 const UPDATES_STORE_NAME = 'dailyUpdates';
 
@@ -35,6 +35,17 @@ const initDB = () => {
         db.createObjectStore(UPDATES_STORE_NAME, { 
             keyPath: 'id', 
             autoIncrement: true 
+        });
+      }
+       if (oldVersion < 3) {
+        // Recreate the dailyUpdates store to match the new schema with title and description.
+        // This will clear any previous daily updates, ensuring schema compatibility.
+        if (db.objectStoreNames.contains(UPDATES_STORE_NAME)) {
+            db.deleteObjectStore(UPDATES_STORE_NAME);
+        }
+        db.createObjectStore(UPDATES_STORE_NAME, {
+            keyPath: 'id',
+            autoIncrement: true
         });
       }
       

@@ -1,5 +1,3 @@
-
-
 import React, { useState, useEffect, useRef, forwardRef } from 'react';
 import HTMLFlipBook from 'react-pageflip';
 import { getAllDailyUpdates } from '../lib/db';
@@ -18,13 +16,14 @@ const PageCover = forwardRef<HTMLDivElement, { children: React.ReactNode }>(({ c
 const Page = forwardRef<HTMLDivElement, { children: React.ReactNode, number: number }>(({ children, number }, ref) => {
     return (
         <div 
-            className="bg-[#ffffe0] text-gray-800 p-8 flex flex-col relative [--page-line-color:#60a5fa] dark:[--page-line-color:#64748b] overflow-hidden" 
+            className="bg-[#fefce8] dark:bg-slate-800 text-gray-800 dark:text-gray-200 p-8 flex flex-col relative [--page-line-color:rgba(224,231,255,0.9)] dark:[--page-line-color:rgba(100,116,139,0.6)] overflow-hidden" 
             ref={ref}
             style={{
-                backgroundImage: 'repeating-linear-gradient(to bottom, transparent 0, transparent 27px, var(--page-line-color) 28px)',
+                backgroundImage: 'repeating-linear-gradient(to bottom, transparent, transparent 27px, var(--page-line-color) 28px)',
                 backgroundSize: '100% 28px',
             }}
         >
+            <div className="absolute top-0 left-10 h-full w-px bg-red-400/60"></div>
             <div className="relative z-10 flex-grow flex flex-col">{children}</div>
             <div className={`absolute bottom-2 z-10 text-xs text-gray-400 font-mono ${number % 2 === 0 ? 'right-4' : 'left-4'}`}>{number}</div>
         </div>
@@ -116,10 +115,10 @@ export const ProgressBookPage: React.FC = () => {
                     </div>
                 </PageCover>
 
-                {updates.map((update, index) => (
-                    <Page key={update.id} number={index + 1}>
-                       <div className="h-full w-full flex flex-col items-center pt-6">
-                            <div className="transform -rotate-2 hover:rotate-1 transition-transform duration-300 ease-in-out">
+                {updates.flatMap((update, index) => [
+                    <Page key={`${update.id}-left`} number={index * 2 + 1}>
+                       <div className="h-full w-full flex flex-col items-center">
+                            <div className="transform -rotate-2 hover:rotate-1 transition-transform duration-300 ease-in-out mt-4">
                                 <div className="bg-white dark:bg-gray-100 p-3 rounded-sm shadow-lg">
                                     <img 
                                         src={update.imageBase64} 
@@ -135,17 +134,23 @@ export const ProgressBookPage: React.FC = () => {
                                 </div>
                             </div>
                             
-                            <div 
-                                className="mt-[28px] font-doodle text-2xl text-gray-700 transform -rotate-1 text-center"
-                            >
-                                <p className="font-bold leading-[28px] pt-[3px]">Weight: {update.weight} kg/lbs</p>
-                                {update.protein != null && (
-                                     <p className="font-bold leading-[28px] pt-[3px]">Protein: {update.protein}g</p>
-                                )}
+                            <div className="mt-4 font-doodle text-2xl text-gray-700 dark:text-gray-300 transform -rotate-1 text-center">
+                                <p className="font-bold pt-[3px]" style={{ lineHeight: '56px' }}>Weight: {update.weight} kg/lbs</p>
                             </div>
                        </div>
+                    </Page>,
+                    <Page key={`${update.id}-right`} number={index * 2 + 2}>
+                        <div className="h-full w-full flex flex-col font-doodle text-gray-700 dark:text-gray-300">
+                            <h2 className="text-3xl font-bold pb-1" style={{ paddingTop: '3px', lineHeight: '56px' }}>
+                                {update.title}
+                            </h2>
+                            <div className="w-full h-px bg-red-300" style={{ marginTop: '-28px', marginBottom: '28px' }}></div>
+                            <p className="text-xl whitespace-pre-wrap flex-grow" style={{ lineHeight: '28px', paddingTop: '3px' }}>
+                                {update.description}
+                            </p>
+                        </div>
                     </Page>
-                ))}
+                ])}
                 
                 <PageCover>
                     <div>

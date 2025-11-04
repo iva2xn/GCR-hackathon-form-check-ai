@@ -15,7 +15,8 @@ export const DailyUpdatePage: React.FC = () => {
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [imageUrl, setImageUrl] = useState<string | null>(null);
     const [weight, setWeight] = useState<string>('');
-    const [protein, setProtein] = useState<string>('');
+    const [title, setTitle] = useState<string>('');
+    const [description, setDescription] = useState<string>('');
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
     const [isSuccess, setIsSuccess] = useState<boolean>(false);
     const [error, setError] = useState<string>('');
@@ -82,7 +83,8 @@ export const DailyUpdatePage: React.FC = () => {
         setImageFile(null);
         setImageUrl(null);
         setWeight('');
-        setProtein('');
+        setTitle('');
+        setDescription('');
         setError('');
         if (fileInputRef.current) {
             fileInputRef.current.value = '';
@@ -91,8 +93,8 @@ export const DailyUpdatePage: React.FC = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!imageFile || !weight) {
-            setError('Please upload an image and enter your current weight.');
+        if (!imageFile || !weight || !title || !description) {
+            setError('All fields are required.');
             return;
         }
 
@@ -106,7 +108,8 @@ export const DailyUpdatePage: React.FC = () => {
                 date: new Date().toISOString(),
                 imageBase64,
                 weight: parseFloat(weight),
-                protein: protein ? parseInt(protein, 10) : undefined,
+                title,
+                description,
             };
             await addDailyUpdate(newUpdate);
             
@@ -124,7 +127,7 @@ export const DailyUpdatePage: React.FC = () => {
         }
     };
 
-    const isFormValid = imageFile && weight && !isSubmitting;
+    const isFormValid = imageFile && weight && title && description && !isSubmitting;
 
     return (
         <div className="w-full max-w-2xl mx-auto animate-fade-in">
@@ -181,16 +184,29 @@ export const DailyUpdatePage: React.FC = () => {
                             />
                         </div>
                         <div>
-                            <label htmlFor="protein" className="block text-sm font-medium text-foreground mb-2">Protein Intake (grams) <span className="text-muted-foreground text-xs">(Optional)</span></label>
+                            <label htmlFor="title" className="block text-sm font-medium text-foreground mb-2">Title</label>
                              <input
-                                id="protein"
-                                type="number"
-                                value={protein}
-                                onChange={(e) => setProtein(e.target.value)}
-                                placeholder="e.g., 150"
+                                id="title"
+                                type="text"
+                                value={title}
+                                onChange={(e) => setTitle(e.target.value)}
+                                placeholder="e.g., Morning Workout"
                                 className="w-full px-4 py-2 bg-input border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                                required
                             />
                         </div>
+                    </div>
+                    <div>
+                        <label htmlFor="description" className="block text-sm font-medium text-foreground mb-2">Description</label>
+                        <textarea
+                            id="description"
+                            rows={4}
+                            value={description}
+                            onChange={(e) => setDescription(e.target.value)}
+                            placeholder="How did you feel? Any new personal records?"
+                            className="w-full px-4 py-2 bg-input border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                            required
+                        />
                     </div>
                     
                     {error && <p className="text-sm text-destructive text-center">{error}</p>}
