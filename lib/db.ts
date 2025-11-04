@@ -3,7 +3,7 @@ import type { HistoryReportData } from '../pages/FormCheckerPage';
 import type { DailyUpdate } from '../types';
 
 const DB_NAME = 'FitTrackDB';
-const DB_VERSION = 3; // Incremented version to trigger schema upgrade
+const DB_VERSION = 3; 
 const REPORTS_STORE_NAME = 'reports';
 const UPDATES_STORE_NAME = 'dailyUpdates';
 
@@ -26,32 +26,27 @@ const initDB = () => {
   }
   dbPromise = openDB<FitTrackDB>(DB_NAME, DB_VERSION, {
     upgrade(db, oldVersion) {
-      if (oldVersion < 2) {
-        // Recreate the dailyUpdates store with a proper auto-incrementing key.
-        // This fixes the persistence issue. This change will clear any previous daily updates.
-        if (db.objectStoreNames.contains(UPDATES_STORE_NAME)) {
-            db.deleteObjectStore(UPDATES_STORE_NAME);
-        }
-        db.createObjectStore(UPDATES_STORE_NAME, { 
-            keyPath: 'id', 
-            autoIncrement: true 
-        });
-      }
-       if (oldVersion < 3) {
-        // Recreate the dailyUpdates store to match the new schema with title and description.
-        // This will clear any previous daily updates, ensuring schema compatibility.
-        if (db.objectStoreNames.contains(UPDATES_STORE_NAME)) {
-            db.deleteObjectStore(UPDATES_STORE_NAME);
-        }
-        db.createObjectStore(UPDATES_STORE_NAME, {
-            keyPath: 'id',
-            autoIncrement: true
-        });
-      }
-      
-      // Ensure reports store exists for fresh installs, leaving it untouched if it exists.
-      if (!db.objectStoreNames.contains(REPORTS_STORE_NAME)) {
-        db.createObjectStore(REPORTS_STORE_NAME, { keyPath: 'id' });
+      switch (oldVersion) {
+        case 0:
+          if (!db.objectStoreNames.contains(REPORTS_STORE_NAME)) {
+            db.createObjectStore(REPORTS_STORE_NAME, { keyPath: 'id' });
+          }
+        case 1:
+          if (!db.objectStoreNames.contains(UPDATES_STORE_NAME)) {
+            db.createObjectStore(UPDATES_STORE_NAME, { 
+                keyPath: 'id', 
+                autoIncrement: true 
+            });
+          }
+        case 2:
+          // The schema for dailyUpdates was updated, but since IndexedDB is schemaless for values,
+          // no destructive recreation is needed. This ensures data persistence.
+          if (!db.objectStoreNames.contains(UPDATES_STORE_NAME)) {
+            db.createObjectStore(UPDATES_STORE_NAME, {
+                keyPath: 'id',
+                autoIncrement: true
+            });
+          }
       }
     },
   });

@@ -12,24 +12,30 @@ const PageCover = forwardRef<HTMLDivElement, { children: React.ReactNode }>(({ c
     );
 });
 
-
 const Page = forwardRef<HTMLDivElement, { children: React.ReactNode, number: number }>(({ children, number }, ref) => {
     return (
         <div 
-            className="bg-[#fefce8] dark:bg-slate-800 text-gray-800 dark:text-gray-200 p-8 flex flex-col relative [--page-line-color:rgba(224,231,255,0.9)] dark:[--page-line-color:rgba(100,116,139,0.6)] overflow-hidden" 
+            className="bg-[#ffff6c] text-gray-800 p-8 flex flex-col relative overflow-hidden" 
             ref={ref}
             style={{
-                backgroundImage: 'repeating-linear-gradient(to bottom, transparent, transparent 27px, var(--page-line-color) 28px)',
+                backgroundImage: `
+                    repeating-linear-gradient(
+                        to bottom,
+                        transparent,
+                        transparent 27px,
+                        #d4d4d4 27px,
+                        #d4d4d4 28px
+                    )
+                `,
                 backgroundSize: '100% 28px',
+                backgroundPosition: '0 8px',
             }}
         >
-            <div className="absolute top-0 left-10 h-full w-px bg-red-400/60"></div>
             <div className="relative z-10 flex-grow flex flex-col">{children}</div>
-            <div className={`absolute bottom-2 z-10 text-xs text-gray-400 font-mono ${number % 2 === 0 ? 'right-4' : 'left-4'}`}>{number}</div>
+            <div className={`absolute bottom-4 z-10 text-xs text-gray-500 font-mono ${number % 2 === 0 ? 'right-4' : 'left-4'}`}>{number}</div>
         </div>
     );
 });
-
 
 export const ProgressBookPage: React.FC = () => {
     const [updates, setUpdates] = useState<DailyUpdate[]>([]);
@@ -41,7 +47,8 @@ export const ProgressBookPage: React.FC = () => {
         const fetchUpdates = async () => {
             try {
                 const allUpdates = await getAllDailyUpdates();
-                setUpdates(allUpdates.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()));
+                const sortedUpdates = allUpdates.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+                setUpdates(sortedUpdates.slice(-15));
             } catch (error) {
                 console.error("Failed to load progress updates:", error);
             } finally {
@@ -55,8 +62,11 @@ export const ProgressBookPage: React.FC = () => {
         const updateBookSize = () => {
             if (containerRef.current) {
                 const containerWidth = containerRef.current.offsetWidth;
-                const width = Math.min(containerWidth * 0.95, 800);
-                const height = width * 1.35; 
+                const viewportHeight = window.innerHeight;
+                
+                const width = Math.min(containerWidth * 0.9, 800);
+                const height = Math.min(width * 1.3, viewportHeight * 0.8);
+                
                 setBookSize({ width: width / 2, height });
             }
         };
@@ -117,14 +127,14 @@ export const ProgressBookPage: React.FC = () => {
 
                 {updates.flatMap((update, index) => [
                     <Page key={`${update.id}-left`} number={index * 2 + 1}>
-                       <div className="h-full w-full flex flex-col items-center">
-                            <div className="transform -rotate-2 hover:rotate-1 transition-transform duration-300 ease-in-out mt-4">
-                                <div className="bg-white dark:bg-gray-100 p-3 rounded-sm shadow-lg">
+                       <div className="h-full w-full flex flex-col items-center justify-center">
+                            <div className="transform -rotate-2 hover:rotate-1 transition-transform duration-300 ease-in-out">
+                                <div className="bg-white p-3 rounded-sm shadow-lg">
                                     <img 
                                         src={update.imageBase64} 
                                         alt={`Progress on ${new Date(update.date).toLocaleDateString()}`} 
                                         className="object-cover border border-gray-200"
-                                        style={{ width: '220px', height: '220px' }}
+                                        style={{ width: '280px', height: '280px' }}
                                     />
                                     <p className="w-full text-left font-digital text-lg text-gray-500 mt-2 px-1">
                                         {new Date(update.date).toLocaleDateString('en-US', {
@@ -134,17 +144,16 @@ export const ProgressBookPage: React.FC = () => {
                                 </div>
                             </div>
                             
-                            <div className="mt-4 font-doodle text-2xl text-gray-700 dark:text-gray-300 transform -rotate-1 text-center">
+                            <div className="mt-6 font-doodle text-2xl text-gray-800 transform -rotate-1 text-center">
                                 <p className="font-bold pt-[3px]" style={{ lineHeight: '56px' }}>Weight: {update.weight} kg/lbs</p>
                             </div>
                        </div>
                     </Page>,
                     <Page key={`${update.id}-right`} number={index * 2 + 2}>
-                        <div className="h-full w-full flex flex-col font-doodle text-gray-700 dark:text-gray-300">
-                            <h2 className="text-3xl font-bold pb-1" style={{ paddingTop: '3px', lineHeight: '56px' }}>
+                        <div className="h-full w-full flex flex-col font-doodle text-gray-800">
+                            <h2 className="text-3xl font-bold mb-4" style={{ paddingTop: '3px', lineHeight: '56px' }}>
                                 {update.title}
                             </h2>
-                            <div className="w-full h-px bg-red-300" style={{ marginTop: '-28px', marginBottom: '28px' }}></div>
                             <p className="text-xl whitespace-pre-wrap flex-grow" style={{ lineHeight: '28px', paddingTop: '3px' }}>
                                 {update.description}
                             </p>

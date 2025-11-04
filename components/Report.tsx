@@ -1,6 +1,8 @@
+
 import React from 'react';
 import type { ReportData } from '../types';
 import { AlertIcon, CheckIcon, GaugeIcon, InfoIcon, RestartIcon, TrophyIcon, ClockIcon, FormCheckIcon } from './icons';
+import { AccordionItem } from './Accordion';
 
 interface ReportProps {
   data: ReportData;
@@ -13,7 +15,7 @@ const ReportCard: React.FC<{
   children: React.ReactNode;
   className?: string;
 }> = ({ title, icon, children, className = '' }) => (
-    <div className={`bg-card rounded-xl border border-border shadow-sm overflow-hidden h-full ${className}`}>
+    <div className={`bg-card rounded-xl border border-border shadow-sm overflow-hidden ${className}`}>
         <div className="p-6">
             <div className="flex items-center mb-4">
                 {icon}
@@ -83,7 +85,7 @@ export const Report: React.FC<ReportProps> = ({ data, onReset }) => {
             </button>
         </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 mt-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 mt-6 lg:items-start">
         
         {/* Main Analysis Content (Spans 2 columns on desktop) */}
         <div className="lg:col-span-2 order-1 space-y-6">
@@ -122,33 +124,31 @@ export const Report: React.FC<ReportProps> = ({ data, onReset }) => {
               </div>
             </ReportCard>
             
-            <ReportCard title={data.correctionPlan.title} icon={<CheckIcon className="w-6 h-6 text-green-500" />}>
-                <div className="space-y-6">
-                  {data.correctionPlan.steps.map((step, index) => (
-                      <div key={index} className="flex items-start gap-4">
-                          <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center text-sm">{index + 1}</div>
-                          <div>
-                              <p className="font-semibold text-card-foreground">{step.title}</p>
-                              <p className="text-muted-foreground text-sm">{step.description}</p>
-                          </div>
-                      </div>
-                  ))}
+            <AccordionItem title={data.correctionPlan.title} icon={<CheckIcon className="w-6 h-6 text-green-500" />} defaultOpen>
+              <div className="space-y-6">
+                {data.correctionPlan.steps.map((step, index) => (
+                    <div key={index} className="flex items-start gap-4">
+                        <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center text-sm">{index + 1}</div>
+                        <div>
+                            <p className="font-semibold text-card-foreground">{step.title}</p>
+                            <p className="text-muted-foreground text-sm">{step.description}</p>
+                        </div>
+                    </div>
+                ))}
               </div>
-            </ReportCard>
+            </AccordionItem>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <ReportCard title={data.rationale.title} icon={<InfoIcon className="w-6 h-6 text-yellow-500" />}>
-                    <p className="text-muted-foreground text-sm">{data.rationale.text}</p>
-                </ReportCard>
+            <AccordionItem title={data.rationale.title} icon={<InfoIcon className="w-6 h-6 text-yellow-500" />}>
+                <p className="text-muted-foreground text-sm">{data.rationale.text}</p>
+            </AccordionItem>
 
-                <ReportCard title={data.positiveReinforcement.title} icon={<FormCheckIcon className="w-6 h-6 text-primary" />}>
-                    <p className="text-muted-foreground text-sm">{data.positiveReinforcement.text}</p>
-                </ReportCard>
-            </div>
+            <AccordionItem title={data.positiveReinforcement.title} icon={<FormCheckIcon className="w-6 h-6 text-primary" />}>
+                <p className="text-muted-foreground text-sm">{data.positiveReinforcement.text}</p>
+            </AccordionItem>
         </div>
 
         {/* Sidebar Content (1 column on desktop) */}
-        <div className="lg:col-span-1 order-2 lg:order-1 space-y-6">
+        <div className="lg:col-span-1 order-2 space-y-6">
              <div className="bg-card rounded-xl border border-border shadow-sm p-6 flex flex-col items-center text-center">
                 <h3 className="text-xl font-bold text-card-foreground mb-4">Overall Score</h3>
                 <div className="relative">
