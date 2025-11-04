@@ -6,7 +6,12 @@ import { LoadingSpinner } from './components/LoadingSpinner';
 import { Report } from './components/Report';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
+import { HistoryPanel } from './components/HistoryPanel';
 import type { AppStatus, ReportData, ScoreDetail } from './types';
+import { addReport, getAllReports, deleteReport } from './lib/db';
+
+// Add id and createdAt to the report data for history management
+export type HistoryReportData = ReportData & { id: number; createdAt: string };
 
 const App: React.FC = () => {
   const [status, setStatus] = useState<AppStatus>('idle');
@@ -18,6 +23,18 @@ const App: React.FC = () => {
   const [startTime, setStartTime] = useState(0);
   const [endTime, setEndTime] = useState(5);
   const [videoDuration, setVideoDuration] = useState(0);
+  const [history, setHistory] = useState<HistoryReportData[]>([]);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+
+
+  useEffect(() => {
+    // Load history from IndexedDB on component mount
+    const fetchHistory = async () => {
+      const reports = await getAllReports();
+      setHistory(reports.sort((a, b) => b.id - a.id)); // Sort by most recent
+    };
+    fetchHistory();
+  }, []);
 
   useEffect(() => {
     // Clean up the object URL to avoid memory leaks
@@ -129,19 +146,23 @@ const App: React.FC = () => {
       setLoadingMessage('Extracting key frames from your video...');
       const frames = await extractFrames(file, NUM_FRAMES, startTime, endTime);
       
-      const prompt = `You are an expert fitness coach and kinesiologist with a positive and encouraging tone. Your primary goal is to provide accurate, helpful feedback to improve a user's exercise form and prevent injury. Analyze this sequence of video frames of a user performing an exercise. Your task is to:
+      const prompt = `You are an expert fitness coach and kinesiologist with a positive and encouraging tone. Your primary goal is to provide accurate, helpful, and realistic feedback to improve a user's exercise form and prevent injury.
+
+**IMPORTANT: People have different body shapes, sizes, and mobility levels. Your analysis must take this into account. Do not penalize for anatomical variations that are not detrimental to the form (e.g., a natural lumbar curve that is not an excessive arch). Base your feedback on safety and efficiency principles, not on an idealized, one-size-fits-all model.**
+
+Analyze this sequence of video frames of a user performing an exercise. Your task is to:
 1. Identify the exercise being performed.
-2. Critically evaluate the user's form. Your main feedback should focus on the single most important area for improvement. 
+2. Critically evaluate the user's form. Your main feedback should focus on the single most important area for improvement.
    - If a critical error exists (something that could lead to injury), focus on that.
    - If the form is good but could be better, focus on the most impactful refinement.
-   - If the form is excellent, acknowledge this and provide a tip for advanced optimization or variation.
+   - If the form is excellent, praise the user's execution and provide a tip for advanced optimization or variation.
 3. Identify the single best aspect of the user's form that they should continue doing.
 4. Provide a detailed analysis and a step-by-step correction or refinement plan for the main point of feedback.
 5. Select the single frame from the sequence (index 0 to ${NUM_FRAMES - 1}) that best illustrates your main feedback point and specify its index.
-6. Provide a detailed performance breakdown. For each of the following metrics, provide a score from 0 to 10 (where 10 is perfect) and a brief justification. Be realistic and constructive in your scoring. Scores of 9-10 should be reserved for textbook execution.
-    - Spinal Alignment: Assess the neutrality of the spine throughout the movement.
+6. Provide a detailed performance breakdown. For each of the following metrics, provide a score from 0 to 10 (where 10 is perfect) and a brief justification. Be realistic, constructive, and fair in your scoring. A score of 9-10 should represent excellent, safe, and effective execution, even if it's not "textbook perfect" due to individual body mechanics. Acknowledge that perfect form can look different on different people.
+    - Spinal Alignment: Assess the neutrality of the spine throughout the movement, allowing for natural curves.
     - Joint Stability: Assess the stability of key joints like knees, hips, and shoulders.
-    - Range of Motion: Assess if the depth and movement range are appropriate and safe for the exercise.
+    - Range of Motion: Assess if the depth and movement range are appropriate and safe for the exercise and the individual's likely mobility.
     - Tempo & Control: Assess the smoothness and control of the movement, noting any jerky or rushed motions.
 7. Based on your detailed breakdown, provide a final, overall justification summarizing the performance.
 You must return your response in a JSON format that adheres to the provided schema. Ensure all strings within the JSON are properly escaped.`;
@@ -225,9 +246,19 @@ You must return your response in a JSON format that adheres to the provided sche
       const averageScore = totalScore / report.formRating.detailedScores.length;
       report.formRating.formScore = Math.round(averageScore * 10);
       report.formRating.level = getLevelFromScore(report.formRating.formScore);
-
-      setReportData(report as ReportData);
+      
+      const finalReport = report as ReportData;
+      setReportData(finalReport);
       setStatus('report');
+
+      // Save to history
+      const newHistoryItem = { 
+        ...finalReport, 
+        id: Date.now(), 
+        createdAt: new Date().toISOString() 
+      };
+      await addReport(newHistoryItem);
+      setHistory(prev => [newHistoryItem, ...prev]);
 
     } catch (err) {
       if (analysisInterval) {
@@ -246,6 +277,21 @@ You must return your response in a JSON format that adheres to the provided sche
     setVideoUrl(null);
     setReportData(null);
     setErrorMessage('');
+  };
+
+  const handleToggleHistory = () => {
+    setIsHistoryOpen(prev => !prev);
+  };
+  
+  const handleViewHistoryItem = (report: HistoryReportData) => {
+    setReportData(report);
+    setStatus('report');
+    setIsHistoryOpen(false);
+  };
+
+  const handleDeleteHistoryItem = async (id: number) => {
+    await deleteReport(id);
+    setHistory(prev => prev.filter(report => report.id !== id));
   };
 
   const renderContent = () => {
@@ -288,12 +334,19 @@ You must return your response in a JSON format that adheres to the provided sche
 
   return (
     <div className="bg-background text-foreground min-h-screen flex flex-col">
-      <Header />
+      <Header onToggleHistory={handleToggleHistory} />
       <main className="flex-grow flex items-center justify-center p-4 sm:p-6 md:p-8">
         <div className="w-full max-w-7xl">
           {renderContent()}
         </div>
       </main>
+      <HistoryPanel 
+        isOpen={isHistoryOpen}
+        onClose={handleToggleHistory}
+        reports={history}
+        onView={handleViewHistoryItem}
+        onDelete={handleDeleteHistoryItem}
+      />
       <Footer />
     </div>
   );
