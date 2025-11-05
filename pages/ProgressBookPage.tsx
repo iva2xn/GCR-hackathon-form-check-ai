@@ -16,19 +16,19 @@ const Page = forwardRef<HTMLDivElement, { children: React.ReactNode, number: num
     const isRightPage = number % 2 === 0;
     return (
         <div 
-            className={`bg-[#ffff6c] text-gray-800 p-8 flex flex-col relative overflow-hidden ${isRightPage ? 'border-l-2 border-gray-800/40' : ''}`} 
+            className={`bg-[#ffff6c] text-gray-800 flex flex-col relative overflow-hidden ${isRightPage ? 'border-l-2 border-gray-800' : ''}`} 
             ref={ref}
             style={{
                 backgroundImage: `
                     repeating-linear-gradient(
                         to bottom,
                         transparent,
-                        transparent 27px,
-                        rgba(209, 213, 219, 0.8) 27px,
-                        rgba(209, 213, 219, 0.8) 28px
+                        transparent 29px,
+                        rgba(173, 216, 230, 0.6) 29px,
+                        rgba(173, 216, 230, 0.6) 30px
                     )
                 `,
-                backgroundSize: '100% 28px',
+                backgroundSize: '100% 30px',
             }}
         >
             <div className="relative z-10 flex-grow flex flex-col">{children}</div>
@@ -127,7 +127,7 @@ export const ProgressBookPage: React.FC = () => {
 
                 {updates.flatMap((update, index) => [
                     <Page key={`${update.id}-left`} number={index * 2 + 1}>
-                       <div className="h-full w-full flex flex-col items-center justify-center">
+                       <div className="h-full w-full flex flex-col items-center pt-8 px-8 pb-8">
                             <div className="transform -rotate-2 hover:rotate-1 transition-transform duration-300 ease-in-out">
                                 <div className="bg-white p-3 rounded-sm shadow-lg">
                                     <img 
@@ -144,17 +144,17 @@ export const ProgressBookPage: React.FC = () => {
                                 </div>
                             </div>
                             
-                            <div className="mt-6 font-doodle text-2xl text-gray-800 transform -rotate-1 text-center">
-                                <p className="font-bold leading-[56px]">Weight: {update.weight} kg/lbs</p>
+                            <div className="mt-auto font-doodle text-2xl text-gray-800 transform -rotate-1 text-center">
+                                <p className="font-bold" style={{ lineHeight: '60px' }}>Weight: {update.weight} kg/lbs</p>
                             </div>
                        </div>
                     </Page>,
                     <Page key={`${update.id}-right`} number={index * 2 + 2}>
-                        <div className="h-full w-full flex flex-col font-doodle text-gray-800">
-                            <h2 className="text-3xl font-bold mb-4 leading-[56px]">
+                        <div className="h-full w-full flex flex-col font-doodle text-gray-800" style={{ padding: '45px 32px 32px 32px' }}>
+                            <h2 className="text-3xl font-bold" style={{ lineHeight: '60px' }}>
                                 {update.title}
                             </h2>
-                            <p className="text-xl whitespace-pre-wrap flex-grow leading-7">
+                            <p className="text-xl whitespace-pre-wrap flex-grow" style={{ lineHeight: '30px' }}>
                                 {update.description}
                             </p>
                         </div>
