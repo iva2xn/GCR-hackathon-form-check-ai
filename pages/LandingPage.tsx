@@ -147,7 +147,7 @@ export const LandingPage: React.FC<{ onNavigate: (page: Page) => void }> = ({ on
             <div className="space-y-6 max-w-4xl mx-auto">
                 <div className="bg-card rounded-xl border border-border shadow-sm p-4 sm:p-6">
                     <ContributionGraph updates={updates} />
-                    <div className="mt-4 flex justify-between items-center">
+                    <div className="mt-4 flex justify-between items-start">
                         <button
                             onClick={() => onNavigate('daily-update')}
                             className="inline-flex items-center justify-center gap-2 bg-secondary rounded-lg border border-border shadow-sm px-4 py-2 text-left transition-all duration-300 hover:shadow-md hover:border-primary/50 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
@@ -167,7 +167,7 @@ export const LandingPage: React.FC<{ onNavigate: (page: Page) => void }> = ({ on
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
                     <button
                         onClick={() => onNavigate('form-checker')}
-                        className="w-full bg-card rounded-xl border border-border shadow-sm p-6 text-left flex items-center gap-4 transition-all duration-300 hover:shadow-lg hover:border-primary/50 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
+                        className="w-full bg-card rounded-xl border border-border shadow-sm px-6 pt-3 pb-6 text-left flex items-center gap-4 transition-all duration-300 hover:shadow-lg hover:border-primary/50 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
                     >
                         <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
                             <FormCheckIcon className="w-7 h-7 text-primary" />
@@ -179,7 +179,7 @@ export const LandingPage: React.FC<{ onNavigate: (page: Page) => void }> = ({ on
                     </button>
                      <button
                         onClick={() => onNavigate('progress-book')}
-                        className="w-full bg-card rounded-xl border border-border shadow-sm p-6 text-left flex items-center gap-4 transition-all duration-300 hover:shadow-lg hover:border-primary/50 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
+                        className="w-full bg-card rounded-xl border border-border shadow-sm px-6 pt-3 pb-6 text-left flex items-center gap-4 transition-all duration-300 hover:shadow-lg hover:border-primary/50 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
                     >
                         <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
                             <BookOpenIcon className="w-7 h-7 text-primary" />
