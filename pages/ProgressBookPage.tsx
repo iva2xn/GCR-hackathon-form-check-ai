@@ -13,9 +13,10 @@ const PageCover = forwardRef<HTMLDivElement, { children: React.ReactNode }>(({ c
 });
 
 const Page = forwardRef<HTMLDivElement, { children: React.ReactNode, number: number }>(({ children, number }, ref) => {
+    const isRightPage = number % 2 === 0;
     return (
         <div 
-            className="bg-[#ffff6c] text-gray-800 p-8 flex flex-col relative overflow-hidden" 
+            className={`bg-[#ffff6c] text-gray-800 p-8 flex flex-col relative overflow-hidden ${isRightPage ? 'border-l-2 border-red-300/70' : ''}`} 
             ref={ref}
             style={{
                 backgroundImage: `
@@ -23,16 +24,15 @@ const Page = forwardRef<HTMLDivElement, { children: React.ReactNode, number: num
                         to bottom,
                         transparent,
                         transparent 27px,
-                        #d4d4d4 27px,
-                        #d4d4d4 28px
+                        rgba(173, 216, 230, 0.7) 27px,
+                        rgba(173, 216, 230, 0.7) 28px
                     )
                 `,
                 backgroundSize: '100% 28px',
-                backgroundPosition: '0 8px',
             }}
         >
             <div className="relative z-10 flex-grow flex flex-col">{children}</div>
-            <div className={`absolute bottom-4 z-10 text-xs text-gray-500 font-mono ${number % 2 === 0 ? 'right-4' : 'left-4'}`}>{number}</div>
+            <div className={`absolute bottom-4 z-10 text-xs text-gray-500 font-mono ${isRightPage ? 'right-4' : 'left-4'}`}>{number}</div>
         </div>
     );
 });
@@ -145,16 +145,16 @@ export const ProgressBookPage: React.FC = () => {
                             </div>
                             
                             <div className="mt-6 font-doodle text-2xl text-gray-800 transform -rotate-1 text-center">
-                                <p className="font-bold pt-[3px]" style={{ lineHeight: '56px' }}>Weight: {update.weight} kg/lbs</p>
+                                <p className="font-bold leading-[56px]">Weight: {update.weight} kg/lbs</p>
                             </div>
                        </div>
                     </Page>,
                     <Page key={`${update.id}-right`} number={index * 2 + 2}>
                         <div className="h-full w-full flex flex-col font-doodle text-gray-800">
-                            <h2 className="text-3xl font-bold mb-4" style={{ paddingTop: '3px', lineHeight: '56px' }}>
+                            <h2 className="text-3xl font-bold mb-4 leading-[56px]">
                                 {update.title}
                             </h2>
-                            <p className="text-xl whitespace-pre-wrap flex-grow" style={{ lineHeight: '28px', paddingTop: '3px' }}>
+                            <p className="text-xl whitespace-pre-wrap flex-grow leading-7">
                                 {update.description}
                             </p>
                         </div>
