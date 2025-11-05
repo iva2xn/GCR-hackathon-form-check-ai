@@ -16,7 +16,7 @@ const Page = forwardRef<HTMLDivElement, { children: React.ReactNode, number: num
     const isRightPage = number % 2 === 0;
     return (
         <div 
-            className={`bg-[#ffff6c] text-gray-800 p-8 flex flex-col relative overflow-hidden ${isRightPage ? 'border-l-2 border-red-300/70' : ''}`} 
+            className={`bg-[#ffff6c] text-gray-800 p-8 flex flex-col relative overflow-hidden ${isRightPage ? 'border-l-2 border-gray-800/40' : ''}`} 
             ref={ref}
             style={{
                 backgroundImage: `
@@ -24,8 +24,8 @@ const Page = forwardRef<HTMLDivElement, { children: React.ReactNode, number: num
                         to bottom,
                         transparent,
                         transparent 27px,
-                        rgba(173, 216, 230, 0.7) 27px,
-                        rgba(173, 216, 230, 0.7) 28px
+                        rgba(209, 213, 219, 0.8) 27px,
+                        rgba(209, 213, 219, 0.8) 28px
                     )
                 `,
                 backgroundSize: '100% 28px',
