@@ -2,11 +2,13 @@ import React, { useState, useEffect, useRef, forwardRef } from 'react';
 import HTMLFlipBook from 'react-pageflip';
 import { getAllDailyUpdates } from '../lib/db';
 import type { DailyUpdate } from '../types';
+// FIX: Removed unused 'CloudIcon' import as it is not an exported member of the icons module.
 import { BookOpenIcon } from '../components/icons';
 
-const PageCover = forwardRef<HTMLDivElement, { children: React.ReactNode }>(({ children }, ref) => {
+const PageCover = forwardRef<HTMLDivElement, { children: React.ReactNode, position: 'front' | 'back' }>(({ children, position }, ref) => {
+    const radiusClasses = position === 'front' ? 'rounded-tr-[0.375rem] rounded-br-[0.375rem]' : 'rounded-tl-[0.375rem] rounded-bl-[0.375rem]';
     return (
-        <div className="bg-primary text-primary-foreground p-6 h-full flex flex-col items-center justify-center text-center shadow-lg" ref={ref}>
+        <div className={`bg-primary text-primary-foreground p-6 h-full flex flex-col items-center text-center shadow-lg space-y-4 pt-48 ${radiusClasses}`} ref={ref}>
             {children}
         </div>
     );
@@ -14,9 +16,10 @@ const PageCover = forwardRef<HTMLDivElement, { children: React.ReactNode }>(({ c
 
 const Page = forwardRef<HTMLDivElement, { children: React.ReactNode, number: number }>(({ children, number }, ref) => {
     const isRightPage = number % 2 === 0;
+    const radiusClasses = isRightPage ? 'rounded-tr-[0.375rem] rounded-br-[0.375rem]' : 'rounded-tl-[0.375rem] rounded-bl-[0.375rem]';
     return (
         <div 
-            className={`bg-[#ffff6c] text-gray-800 flex flex-col relative overflow-hidden ${isRightPage ? 'border-l-2 border-gray-800' : ''}`} 
+            className={`bg-[#ffff6c] text-gray-800 flex flex-col relative overflow-hidden ${isRightPage ? 'border-l-2 border-gray-800' : ''} ${radiusClasses}`} 
             ref={ref}
             style={{
                 backgroundImage: `
@@ -117,10 +120,9 @@ export const ProgressBookPage: React.FC = () => {
                 className="shadow-2xl"
                 flippingTime={600}
             >
-                <PageCover>
-                    <BookOpenIcon className="w-16 h-16 mb-4 mx-auto text-primary-foreground" />
+                <PageCover position="front">
                     <h1 className="text-3xl font-bold font-serif">My Progress Book</h1>
-                    <p className="mt-2 text-sm opacity-80">A journey of a thousand miles begins with a single step.</p>
+                    <p className="text-sm opacity-80">A journey of a thousand miles begins with a single step.</p>
                 </PageCover>
 
                 {updates.flatMap((update, index) => [
@@ -160,7 +162,7 @@ export const ProgressBookPage: React.FC = () => {
                     </Page>
                 ])}
                 
-                <PageCover>
+                <PageCover position="back">
                     <h2 className="text-2xl font-bold font-serif">To Be Continued...</h2>
                 </PageCover>
             </AnyHTMLFlipBook>
