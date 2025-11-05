@@ -10,18 +10,18 @@ const ContributionGraph: React.FC<{ updates: DailyUpdate[] }> = ({ updates }) =>
     
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const WEEKS = 53;
+    const WEEKS = 27; // Show last ~6 months
 
     const activityDates = new Set(updates.map(u => toYMD(new Date(u.date))));
 
-    // Calculate the start date for the grid. It should be ~53 weeks ago, aligned to a Sunday.
+    // Calculate the start date for the grid. It should be ~27 weeks ago, aligned to a Sunday.
     const lastSunday = new Date(today);
     lastSunday.setDate(lastSunday.getDate() - today.getDay());
     
     const startDate = new Date(lastSunday);
     startDate.setDate(startDate.getDate() - (WEEKS - 1) * 7);
 
-    // Create an array of day objects for the last 53 weeks.
+    // Create an array of day objects for the last 27 weeks.
     const dayCells = Array.from({ length: WEEKS * 7 }).map((_, index) => {
         const date = new Date(startDate);
         date.setDate(date.getDate() + index);
@@ -84,7 +84,7 @@ const ContributionGraph: React.FC<{ updates: DailyUpdate[] }> = ({ updates }) =>
                                         key={index}
                                         title={tooltipText}
                                         className={`w-2.5 h-2.5 rounded-[2px] ${
-                                          isFuture ? 'bg-transparent' : hasActivity ? 'bg-green-600' : 'bg-secondary'
+                                          isFuture ? 'bg-transparent' : hasActivity ? 'bg-primary' : 'bg-secondary'
                                         }`}
                                     />
                                 )
@@ -95,7 +95,7 @@ const ContributionGraph: React.FC<{ updates: DailyUpdate[] }> = ({ updates }) =>
                  <div className="text-xs text-muted-foreground mt-2 flex justify-end items-center gap-2">
                     Less
                     <div className="w-2.5 h-2.5 rounded-[2px] bg-secondary"></div>
-                    <div className="w-2.5 h-2.5 rounded-[2px] bg-green-600"></div>
+                    <div className="w-2.5 h-2.5 rounded-[2px] bg-primary"></div>
                     More
                 </div>
             </div>
@@ -118,7 +118,7 @@ export const LandingPage: React.FC<{ onNavigate: (page: Page) => void }> = ({ on
 
     return (
         <div className="w-full text-center animate-fade-in">
-            <div className="space-y-12 max-w-4xl mx-auto">
+            <div className="space-y-8 max-w-4xl mx-auto">
                 <div className="bg-card rounded-xl border border-border shadow-sm p-4 sm:p-6">
                     <ContributionGraph updates={updates} />
                 </div>
