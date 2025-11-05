@@ -6,7 +6,7 @@ import { BookOpenIcon } from '../components/icons';
 
 const PageCover = forwardRef<HTMLDivElement, { children: React.ReactNode }>(({ children }, ref) => {
     return (
-        <div className="bg-primary text-primary-foreground p-6 flex flex-col items-center justify-center text-center shadow-lg" ref={ref}>
+        <div className="bg-primary text-primary-foreground p-6 h-full flex flex-col items-center justify-center text-center shadow-lg" ref={ref}>
             {children}
         </div>
     );
@@ -118,24 +118,23 @@ export const ProgressBookPage: React.FC = () => {
                 flippingTime={600}
             >
                 <PageCover>
-                    <div>
-                        <BookOpenIcon className="w-16 h-16 mb-4 mx-auto text-primary-foreground" />
-                        <h1 className="text-3xl font-bold font-serif">My Progress Book</h1>
-                        <p className="mt-2 text-sm opacity-80">A journey of a thousand miles begins with a single step.</p>
-                    </div>
+                    <BookOpenIcon className="w-16 h-16 mb-4 mx-auto text-primary-foreground" />
+                    <h1 className="text-3xl font-bold font-serif">My Progress Book</h1>
+                    <p className="mt-2 text-sm opacity-80">A journey of a thousand miles begins with a single step.</p>
                 </PageCover>
 
                 {updates.flatMap((update, index) => [
                     <Page key={`${update.id}-left`} number={index * 2 + 1}>
-                       <div className="h-full w-full flex flex-col items-center pt-8 px-8 pb-8">
-                            <div className="transform -rotate-2 hover:rotate-1 transition-transform duration-300 ease-in-out">
+                       <div className="h-full w-full flex flex-col items-center justify-between pt-8 px-8 pb-8">
+                            <div className="transform -rotate-2 hover:rotate-1 transition-transform duration-300 ease-in-out w-full max-w-[280px] mx-auto">
                                 <div className="bg-white p-3 rounded-sm shadow-lg">
-                                    <img 
-                                        src={update.imageBase64} 
-                                        alt={`Progress on ${new Date(update.date).toLocaleDateString()}`} 
-                                        className="object-cover border border-gray-200"
-                                        style={{ width: '280px', height: '280px' }}
-                                    />
+                                    <div className="aspect-[3/4] bg-gray-100">
+                                        <img 
+                                            src={update.imageBase64} 
+                                            alt={`Progress on ${new Date(update.date).toLocaleDateString()}`} 
+                                            className="w-full h-full object-cover border border-gray-200"
+                                        />
+                                    </div>
                                     <p className="w-full text-left font-digital text-lg text-gray-500 mt-2 px-1">
                                         {new Date(update.date).toLocaleDateString('en-US', {
                                             year: '2-digit', month: '2-digit', day: '2-digit' 
@@ -144,7 +143,7 @@ export const ProgressBookPage: React.FC = () => {
                                 </div>
                             </div>
                             
-                            <div className="mt-auto font-doodle text-2xl text-gray-800 transform -rotate-1 text-center">
+                            <div className="font-doodle text-2xl text-gray-800 transform -rotate-1 text-center">
                                 <p className="font-bold" style={{ lineHeight: '60px' }}>Weight: {update.weight} kg/lbs</p>
                             </div>
                        </div>
@@ -162,9 +161,7 @@ export const ProgressBookPage: React.FC = () => {
                 ])}
                 
                 <PageCover>
-                    <div>
-                        <h2 className="text-2xl font-bold font-serif">To Be Continued...</h2>
-                    </div>
+                    <h2 className="text-2xl font-bold font-serif">To Be Continued...</h2>
                 </PageCover>
             </AnyHTMLFlipBook>
         </div>
