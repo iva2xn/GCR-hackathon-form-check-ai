@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import type { Page } from '../App';
 import { FormCheckIcon, BookOpenIcon, PlusIcon } from '../components/icons';
@@ -144,7 +145,7 @@ export const LandingPage: React.FC<{ onNavigate: (page: Page) => void }> = ({ on
 
     return (
         <div className="w-full text-center animate-fade-in">
-            <div className="space-y-6 max-w-4xl mx-auto">
+            <div className="space-y-4 max-w-4xl mx-auto">
                 <div className="bg-card rounded-xl border border-border shadow-sm p-4 sm:p-6">
                     <ContributionGraph updates={updates} />
                     <div className="mt-4 flex justify-between items-start">

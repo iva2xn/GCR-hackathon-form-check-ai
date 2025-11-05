@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { FormCheckIcon, HistoryIcon, ArrowLeftIcon } from './icons';
 
@@ -20,7 +21,7 @@ export const Header: React.FC<HeaderProps> = ({ onHomeClick, showHistoryButton =
   );
   
   return (
-    <header className="p-4 sm:p-6 w-full">
+    <header className="px-4 sm:px-6 py-3 w-full border-b border-border">
       <div className="mx-auto max-w-7xl">
         <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 sm:gap-4">

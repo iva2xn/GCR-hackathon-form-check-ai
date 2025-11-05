@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { LandingPage } from './pages/LandingPage';
 import { FormCheckerPage } from './pages/FormCheckerPage';
@@ -36,7 +37,7 @@ const App: React.FC = () => {
               showHistoryButton={currentPage === 'form-checker'}
               showBackButton={currentPage !== 'landing'}
             />
-            <main className="flex-grow flex items-center justify-center p-4 sm:p-6 md:p-8">
+            <main className="flex-grow flex items-center justify-center px-4 sm:px-6 md:px-8 py-4">
                 <div className="w-full max-w-7xl">
                     {renderContent()}
                 </div>
