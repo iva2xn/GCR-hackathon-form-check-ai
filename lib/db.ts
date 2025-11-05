@@ -26,27 +26,18 @@ const initDB = () => {
   }
   dbPromise = openDB<FitTrackDB>(DB_NAME, DB_VERSION, {
     upgrade(db, oldVersion) {
-      switch (oldVersion) {
-        case 0:
-          if (!db.objectStoreNames.contains(REPORTS_STORE_NAME)) {
-            db.createObjectStore(REPORTS_STORE_NAME, { keyPath: 'id' });
-          }
-        case 1:
-          if (!db.objectStoreNames.contains(UPDATES_STORE_NAME)) {
-            db.createObjectStore(UPDATES_STORE_NAME, { 
-                keyPath: 'id', 
-                autoIncrement: true 
-            });
-          }
-        case 2:
-          // The schema for dailyUpdates was updated, but since IndexedDB is schemaless for values,
-          // no destructive recreation is needed. This ensures data persistence.
-          if (!db.objectStoreNames.contains(UPDATES_STORE_NAME)) {
-            db.createObjectStore(UPDATES_STORE_NAME, {
-                keyPath: 'id',
-                autoIncrement: true
-            });
-          }
+      // This is a major upgrade that fixes persistence issues.
+      // To ensure a clean state, we are recreating the object stores.
+      // This will clear existing data one time.
+      if (oldVersion < DB_VERSION) {
+        if (db.objectStoreNames.contains(REPORTS_STORE_NAME)) {
+          db.deleteObjectStore(REPORTS_STORE_NAME);
+        }
+        if (db.objectStoreNames.contains(UPDATES_STORE_NAME)) {
+          db.deleteObjectStore(UPDATES_STORE_NAME);
+        }
+        db.createObjectStore(REPORTS_STORE_NAME, { keyPath: 'id' });
+        db.createObjectStore(UPDATES_STORE_NAME, { keyPath: 'id', autoIncrement: true });
       }
     },
   });
