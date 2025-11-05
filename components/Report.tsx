@@ -1,4 +1,5 @@
 
+
 import React from 'react';
 import type { ReportData } from '../types';
 import { AlertIcon, CheckIcon, GaugeIcon, InfoIcon, RestartIcon, TrophyIcon, ClockIcon, FormCheckIcon } from './icons';
@@ -124,6 +125,35 @@ export const Report: React.FC<ReportProps> = ({ data, onReset }) => {
               </div>
             </ReportCard>
             
+            <ReportCard title="Overall Score" icon={<GaugeIcon className="w-6 h-6 text-primary" />}>
+                <div className="flex flex-col items-center text-center">
+                    <div className="relative">
+                        <svg className="w-40 h-40 transform -rotate-90" viewBox="0 0 160 160">
+                            <circle cx="80" cy="80" r={circleRadius} stroke="currentColor" strokeWidth={circleStrokeWidth} fill="transparent" className="text-muted opacity-10" />
+                            <circle
+                                cx="80"
+                                cy="80"
+                                r={circleRadius}
+                                stroke="currentColor"
+                                strokeWidth={circleStrokeWidth}
+                                fill="transparent"
+                                strokeDasharray={strokeDasharray}
+                                strokeDashoffset={strokeDashoffset}
+                                strokeLinecap="round"
+                                className={`${ratingColor} transition-all duration-1000 ease-out`}
+                            />
+                        </svg>
+                        <div className="absolute inset-0 flex items-center justify-center">
+                            <span className={`text-5xl font-bold ${ratingColor}`}>{data.formRating.formScore}</span>
+                        </div>
+                    </div>
+                    <h2 className={`text-3xl font-bold mt-4 ${ratingColor}`}>
+                        {data.formRating.level}
+                    </h2>
+                    <p className="text-sm text-muted-foreground mt-2 max-w-md">{data.formRating.justification}</p>
+                </div>
+            </ReportCard>
+
             <AccordionItem title={data.correctionPlan.title} icon={<CheckIcon className="w-6 h-6 text-green-500" />} defaultOpen>
               <div className="space-y-6">
                 {data.correctionPlan.steps.map((step, index) => (
@@ -149,34 +179,6 @@ export const Report: React.FC<ReportProps> = ({ data, onReset }) => {
 
         {/* Sidebar Content (1 column on desktop) */}
         <div className="lg:col-span-1 order-2 space-y-6">
-             <div className="bg-card rounded-xl border border-border shadow-sm p-6 flex flex-col items-center text-center">
-                <h3 className="text-xl font-bold text-card-foreground mb-4">Overall Score</h3>
-                <div className="relative">
-                    <svg className="w-40 h-40 transform -rotate-90" viewBox="0 0 160 160">
-                        <circle cx="80" cy="80" r={circleRadius} stroke="currentColor" strokeWidth={circleStrokeWidth} fill="transparent" className="text-muted opacity-10" />
-                        <circle
-                            cx="80"
-                            cy="80"
-                            r={circleRadius}
-                            stroke="currentColor"
-                            strokeWidth={circleStrokeWidth}
-                            fill="transparent"
-                            strokeDasharray={strokeDasharray}
-                            strokeDashoffset={strokeDashoffset}
-                            strokeLinecap="round"
-                            className={`${ratingColor} transition-all duration-1000 ease-out`}
-                        />
-                    </svg>
-                    <div className="absolute inset-0 flex items-center justify-center">
-                        <span className={`text-5xl font-bold ${ratingColor}`}>{data.formRating.formScore}</span>
-                    </div>
-                </div>
-                <h2 className={`text-3xl font-bold mt-4 ${ratingColor}`}>
-                    {data.formRating.level}
-                </h2>
-                <p className="text-sm text-muted-foreground mt-2 max-w-md">{data.formRating.justification}</p>
-            </div>
-            
             <ReportCard title="Detailed Breakdown" icon={<GaugeIcon className="w-6 h-6 text-primary" />}>
                  <div className="space-y-5">
                     {data.formRating.detailedScores.map((item, index) => (
