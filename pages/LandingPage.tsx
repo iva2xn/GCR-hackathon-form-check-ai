@@ -1,9 +1,9 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import type { Page } from '../App';
-import { FormCheckIcon, BookOpenIcon, PlusIcon } from '../components/icons';
+import { FormCheckIcon, BookOpenIcon, PlusIcon, ArrowRightIcon } from '../components/icons';
 import { getAllDailyUpdates } from '../lib/db';
 import type { DailyUpdate } from '../types';
+import { FormAnalysisAnimation, ProgressBookAnimation } from '../components/LandingPageAnimations';
 
 // A sub-component for the activity graph, redesigned to mimic GitHub's contribution chart
 const ContributionGraph: React.FC<{ updates: DailyUpdate[] }> = ({ updates }) => {
@@ -66,22 +66,31 @@ const ContributionGraph: React.FC<{ updates: DailyUpdate[] }> = ({ updates }) =>
         };
     });
     
-    // Generate month labels that appear at the start of a new month.
-    const monthLabels = Array.from({ length: WEEKS }).map((_, weekIndex) => {
+    // Generate month labels, preventing them from overlapping on small screens.
+    const monthLabels = Array.from({ length: WEEKS }).reduce<{label: string, index: number}[]>((acc, _, weekIndex) => {
         const firstDayOfWeek = dayCells[weekIndex * 7]?.date;
-        if (!firstDayOfWeek) return null;
+        if (!firstDayOfWeek) return acc;
 
         const month = firstDayOfWeek.toLocaleString('default', { month: 'short' });
 
-        // Show label only for the first week of a new month shown on the chart.
-        if (weekIndex === 0) return month;
-        
-        const firstDayOfPrevWeek = dayCells[(weekIndex - 1) * 7]?.date;
-        if (!firstDayOfPrevWeek || firstDayOfWeek.getMonth() !== firstDayOfPrevWeek.getMonth()) {
-            return month;
+        // Show label only for the first week of a new month.
+        if (weekIndex > 0) {
+            const firstDayOfPrevWeek = dayCells[(weekIndex - 1) * 7]?.date;
+            if (!firstDayOfPrevWeek || firstDayOfWeek.getMonth() === firstDayOfPrevWeek.getMonth()) {
+                return acc; // Not a new month, skip.
+            }
         }
-        return null;
-    });
+        
+        // Anti-squish logic: ensure there's enough space from the last rendered label.
+        const lastLabel = acc[acc.length - 1];
+        // A minimum of 4 weeks of space is needed for a 3-letter month label to not overlap.
+        if (lastLabel && weekIndex - lastLabel.index < 4) { 
+            return acc;
+        }
+
+        acc.push({ label: month, index: weekIndex });
+        return acc;
+    }, []);
 
     return (
         <div ref={graphContainerRef} className="pb-2">
@@ -100,10 +109,14 @@ const ContributionGraph: React.FC<{ updates: DailyUpdate[] }> = ({ updates }) =>
                 {/* Graph itself */}
                 <div className="flex flex-col gap-1 w-full">
                     {/* Month labels */}
-                    <div className="grid h-4" style={{ gridTemplateColumns: `repeat(${WEEKS}, 1fr)` }}>
-                       {monthLabels.map((month, index) => (
-                           <div key={index} className="text-xs text-muted-foreground overflow-visible whitespace-nowrap">
-                               {month}
+                    <div className="relative h-4">
+                       {monthLabels.map(({ label, index }) => (
+                           <div 
+                               key={index} 
+                               className="absolute top-0 text-xs text-muted-foreground"
+                               style={{ left: `calc(${(index / WEEKS) * 100}%)` }}
+                           >
+                               {label}
                            </div>
                        ))}
                     </div>
@@ -148,13 +161,13 @@ export const LandingPage: React.FC<{ onNavigate: (page: Page) => void }> = ({ on
             <div className="space-y-4 max-w-4xl mx-auto">
                 <div className="bg-card rounded-xl border border-border shadow-sm p-4 sm:p-6">
                     <ContributionGraph updates={updates} />
-                    <div className="mt-4 flex justify-between items-start">
+                    <div className="mt-4 flex justify-between items-center">
                         <button
                             onClick={() => onNavigate('daily-update')}
-                            className="inline-flex items-center justify-center gap-2 bg-secondary rounded-lg border border-border shadow-sm px-4 py-2 text-left transition-all duration-300 hover:shadow-md hover:border-primary/50 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
+                            className="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-bold text-primary-foreground bg-primary rounded-md shadow-sm transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
                         >
-                            <PlusIcon className="w-4 h-4 text-primary" />
-                            <h3 className="text-sm font-semibold text-card-foreground">Log Progress</h3>
+                            <PlusIcon className="w-4 h-4" />
+                            <span>Add Daily Update</span>
                         </button>
                         <div className="text-xs text-muted-foreground flex items-center gap-2">
                             Less
@@ -166,30 +179,53 @@ export const LandingPage: React.FC<{ onNavigate: (page: Page) => void }> = ({ on
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
-                    <button
-                        onClick={() => onNavigate('form-checker')}
-                        className="w-full bg-card rounded-xl border border-border shadow-sm px-6 pt-3 pb-6 text-left flex items-center gap-4 transition-all duration-300 hover:shadow-lg hover:border-primary/50 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
-                    >
-                        <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                            <FormCheckIcon className="w-7 h-7 text-primary" />
+                    <div className="w-full bg-card rounded-xl border border-border shadow-sm p-6 flex flex-col text-left transition-all duration-300 hover:shadow-lg hover:border-primary/50">
+                        <div className="flex items-start gap-4">
+                            <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <FormCheckIcon className="w-7 h-7 text-primary" />
+                            </div>
+                            <div>
+                                <h3 className="text-xl font-bold text-card-foreground">Analyze Your Form</h3>
+                                <p className="text-muted-foreground text-sm mt-1">Get instant feedback on your form.</p>
+                            </div>
                         </div>
-                        <div>
-                            <h3 className="text-xl font-bold text-card-foreground">Analyze Your Form</h3>
-                            <p className="text-muted-foreground text-sm">Get instant feedback on your form.</p>
+                        <div className="mt-4 flex-grow">
+                            <FormAnalysisAnimation />
                         </div>
-                    </button>
-                     <button
-                        onClick={() => onNavigate('progress-book')}
-                        className="w-full bg-card rounded-xl border border-border shadow-sm px-6 pt-3 pb-6 text-left flex items-center gap-4 transition-all duration-300 hover:shadow-lg hover:border-primary/50 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
-                    >
-                        <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                            <BookOpenIcon className="w-7 h-7 text-primary" />
+                        <div className="mt-6">
+                            <button
+                                onClick={() => onNavigate('form-checker')}
+                                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-bold text-primary-foreground bg-primary rounded-md shadow-sm transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
+                            >
+                                <span>Analyze Form</span>
+                                <ArrowRightIcon className="w-4 h-4" />
+                            </button>
                         </div>
-                        <div>
-                            <h3 className="text-xl font-bold text-card-foreground">Open Progress Book</h3>
-                            <p className="text-muted-foreground text-sm">Review your fitness journey.</p>
+                    </div>
+                    
+                    <div className="w-full bg-card rounded-xl border border-border shadow-sm p-6 flex flex-col text-left transition-all duration-300 hover:shadow-lg hover:border-primary/50">
+                        <div className="flex items-start gap-4">
+                            <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <BookOpenIcon className="w-7 h-7 text-primary" />
+                            </div>
+                            <div>
+                                <h3 className="text-xl font-bold text-card-foreground">Open Progress Book</h3>
+                                <p className="text-muted-foreground text-sm mt-1">Review your fitness journey.</p>
+                            </div>
                         </div>
-                    </button>
+                         <div className="mt-4 flex-grow">
+                            <ProgressBookAnimation />
+                        </div>
+                        <div className="mt-6">
+                            <button
+                                onClick={() => onNavigate('progress-book')}
+                                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-bold text-primary-foreground bg-primary rounded-md shadow-sm transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
+                            >
+                                <span>Open Book</span>
+                                <ArrowRightIcon className="w-4 h-4" />
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
