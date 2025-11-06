@@ -2,13 +2,13 @@ import React from 'react';
 
 export const FormAnalysisAnimation: React.FC = () => {
     const chartData = [
-        { name: 'Tempo', value: 100, color: 'var(--chart-5)', radius: 32 },
-        { name: 'Depth', value: 95, color: 'var(--chart-4)', radius: 42 },
-        { name: 'Stability', value: 75, color: 'var(--chart-3)', radius: 52 },
-        { name: 'Alignment', value: 80, color: 'var(--chart-2)', radius: 62 },
-        { name: 'Consistency', value: 100, color: 'var(--chart-1)', radius: 72 },
+        { name: 'Tempo', value: 149, color: 'var(--chart-5)', radius: 32 },
+        { name: 'Depth', value: 135, color: 'var(--chart-4)', radius: 42 },
+        { name: 'Stability', value: 125, color: 'var(--chart-3)', radius: 52 },
+        { name: 'Alignment', value: 110, color: 'var(--chart-2)', radius: 62 },
+        { name: 'Consistency', value: 90, color: 'var(--chart-1)', radius: 72 },
     ];
-    const totalScore = 90;
+    const totalScore = 78;
 
     const centerX = 80;
     const centerY = 80;
@@ -30,7 +30,7 @@ export const FormAnalysisAnimation: React.FC = () => {
         return `M ${start.x} ${start.y} A ${radius} ${radius} 0 ${largeArcFlag} ${sweepFlag} ${end.x} ${end.y}`;
     };
     
-    const gridRadii = [32, 42, 52, 62, 72];
+    const gridRadii = [32, 42, 52, 62, 75];
     const numRadialLines = 12;
     const radialLines = Array.from({ length: numRadialLines }).map((_, i) => {
         const angle = (i / numRadialLines) * 360;
