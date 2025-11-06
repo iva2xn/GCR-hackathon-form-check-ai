@@ -39,7 +39,7 @@ const ScoreBreakdownCard: React.FC<{ formRating: ReportData['formRating'] }> = (
   const chartData = formRating.detailedScores.map((item, index) => ({
     name: item.metric,
     score: item.score, // The original score for text display
-    visualValue: item.score, // Use actual score for accurate visual representation
+    visualValue: item.score + 49, // Inflate score to make arcs appear longer.
     color: metricColors[index],
     radius: baseRadius + (index * radiusIncrement),
   })).reverse();
@@ -93,7 +93,6 @@ const ScoreBreakdownCard: React.FC<{ formRating: ReportData['formRating'] }> = (
         }
         .count-up-text { animation: count-up 1s 0.5s ease-out forwards; opacity: 0; }
         ${chartData.map((item, index) => {
-            // Use actual score for arc calculation, with 100 as the max.
             const sweepAngle = (item.visualValue / 100) * maxAngleDegrees;
             const angleInRadians = (sweepAngle * Math.PI) / 180.0;
             const arcLength = angleInRadians * item.radius;
@@ -117,7 +116,6 @@ const ScoreBreakdownCard: React.FC<{ formRating: ReportData['formRating'] }> = (
                 </g>
                 
                 {chartData.map((item, index) => {
-                    // Use actual score for arc calculation, with 100 as the max.
                     const sweepAngle = (item.visualValue / 100) * maxAngleDegrees;
                     const endAngle = chartStartAngle - sweepAngle;
                     const arcPath = describeArc(item.radius, chartStartAngle, endAngle);
@@ -221,66 +219,72 @@ export const Report: React.FC<ReportProps> = ({ data, onReset }) => {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 mt-6 lg:items-start">
         
-        <div className="order-1 space-y-6">
-            <ReportCard title={data.error.title} icon={feedbackStyles.icon}>
-              <div className="space-y-4">
-                  <div className="relative rounded-lg overflow-hidden border border-border bg-black flex justify-center items-center mb-4">
-                      <img src={data.error.imageSrc} alt="Exercise frame with feedback" className="max-w-full max-h-[45vh] object-contain" />
-                      <span className={`absolute top-2 right-2 text-xs font-mono px-2 py-1 rounded flex items-center bg-card/80 backdrop-blur-sm ${feedbackStyles.text}`}>
-                          <ClockIcon className="w-3 h-3 mr-1.5" />
-                          {data.error.timestamp}
-                      </span>
-                  </div>
+        {/* Main error card */}
+        <div className="order-1">
+          <ReportCard title={data.error.title} icon={feedbackStyles.icon}>
+            <div className="space-y-4">
+                <div className="relative rounded-lg overflow-hidden border border-border bg-black flex justify-center items-center mb-4">
+                    <img src={data.error.imageSrc} alt="Exercise frame with feedback" className="max-w-full max-h-[45vh] object-contain" />
+                    <span className={`absolute top-2 right-2 text-xs font-mono px-2 py-1 rounded flex items-center bg-card/80 backdrop-blur-sm ${feedbackStyles.text}`}>
+                        <ClockIcon className="w-3 h-3 mr-1.5" />
+                        {data.error.timestamp}
+                    </span>
+                </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                    <div>
+                        <p className="text-sm text-muted-foreground font-medium">Finding</p>
+                        <p className={`font-semibold text-lg ${feedbackStyles.findingsText}`}>{data.findings.errorName}</p>
+                    </div>
                       <div>
-                          <p className="text-sm text-muted-foreground font-medium">Finding</p>
-                          <p className={`font-semibold text-lg ${feedbackStyles.findingsText}`}>{data.findings.errorName}</p>
-                      </div>
-                       <div>
-                          <p className="text-sm text-muted-foreground font-medium">Analysis Confidence</p>
-                          <p className="font-mono text-lg text-green-500">{data.findings.confidence}</p>
-                      </div>
-                      <div className="md:col-span-2">
-                          <p className="text-sm text-muted-foreground font-medium">Description</p>
-                          <p className="text-sm text-foreground">{data.findings.description}</p>
-                      </div>
-                      <div className="md:col-span-2">
-                          <p className="text-sm text-muted-foreground font-medium">Affected Joints</p>
-                          <div className="flex flex-wrap gap-2 mt-1">
-                              {data.findings.affectedJoints.map((joint) => (
-                                  <span key={joint} className="text-xs font-medium bg-secondary text-secondary-foreground px-2 py-1 rounded-full">{joint}</span>
-                              ))}
-                          </div>
-                      </div>
-                  </div>
-              </div>
-            </ReportCard>
-            <ScoreBreakdownCard formRating={data.formRating} />
-        </div>
-
-        <div className="order-2 space-y-6">
-            <AccordionItem title={data.correctionPlan.title} icon={<CheckIcon className="w-6 h-6 text-green-500" />} defaultOpen>
-              <div className="space-y-6">
-                {data.correctionPlan.steps.map((step, index) => (
-                    <div key={index} className="flex items-start gap-4">
-                        <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center text-sm">{index + 1}</div>
-                        <div>
-                            <p className="font-semibold text-card-foreground">{step.title}</p>
-                            <p className="text-muted-foreground text-sm">{step.description}</p>
+                        <p className="text-sm text-muted-foreground font-medium">Analysis Confidence</p>
+                        <p className="font-mono text-lg text-green-500">{data.findings.confidence}</p>
+                    </div>
+                    <div className="md:col-span-2">
+                        <p className="text-sm text-muted-foreground font-medium">Description</p>
+                        <p className="text-sm text-foreground">{data.findings.description}</p>
+                    </div>
+                    <div className="md:col-span-2">
+                        <p className="text-sm text-muted-foreground font-medium">Affected Joints</p>
+                        <div className="flex flex-wrap gap-2 mt-1">
+                            {data.findings.affectedJoints.map((joint) => (
+                                <span key={joint} className="text-xs font-medium bg-secondary text-secondary-foreground px-2 py-1 rounded-full">{joint}</span>
+                            ))}
                         </div>
                     </div>
-                ))}
-              </div>
-            </AccordionItem>
+                </div>
+            </div>
+          </ReportCard>
+        </div>
+        
+        {/* Accordion items group */}
+        <div className="order-3 lg:order-2 space-y-6">
+          <AccordionItem title={data.correctionPlan.title} icon={<CheckIcon className="w-6 h-6 text-green-500" />} defaultOpen>
+            <div className="space-y-6">
+              {data.correctionPlan.steps.map((step, index) => (
+                  <div key={index} className="flex items-start gap-4">
+                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center text-sm">{index + 1}</div>
+                      <div>
+                          <p className="font-semibold text-card-foreground">{step.title}</p>
+                          <p className="text-muted-foreground text-sm">{step.description}</p>
+                      </div>
+                  </div>
+              ))}
+            </div>
+          </AccordionItem>
 
-            <AccordionItem title={data.rationale.title} icon={<InfoIcon className="w-6 h-6 text-yellow-500" />}>
-                <p className="text-muted-foreground text-sm">{data.rationale.text}</p>
-            </AccordionItem>
+          <AccordionItem title={data.rationale.title} icon={<InfoIcon className="w-6 h-6 text-yellow-500" />}>
+              <p className="text-muted-foreground text-sm">{data.rationale.text}</p>
+          </AccordionItem>
 
-            <AccordionItem title={data.positiveReinforcement.title} icon={<FormCheckIcon className="w-6 h-6 text-primary" />}>
-                <p className="text-muted-foreground text-sm">{data.positiveReinforcement.text}</p>
-            </AccordionItem>
+          <AccordionItem title={data.positiveReinforcement.title} icon={<FormCheckIcon className="w-6 h-6 text-primary" />}>
+              <p className="text-muted-foreground text-sm">{data.positiveReinforcement.text}</p>
+          </AccordionItem>
+        </div>
+        
+        {/* Score breakdown, positioned correctly for both mobile and desktop */}
+        <div className="order-2 lg:order-3 lg:col-start-2 lg:row-start-1 lg:row-span-2">
+            <ScoreBreakdownCard formRating={data.formRating} />
         </div>
 
       </div>
