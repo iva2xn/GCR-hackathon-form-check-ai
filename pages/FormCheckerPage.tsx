@@ -1,9 +1,9 @@
+
 import React, { useState, useEffect } from 'react';
 import { GoogleGenAI, Type } from "@google/genai";
 import { FileUpload } from '../components/FileUpload';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { Report } from '../components/Report';
-import { Header } from '../components/Header';
 import { HistoryPanel } from '../components/HistoryPanel';
 import type { AppStatus, ReportData, ScoreDetail } from '../types';
 import { addReport, getAllReports, deleteReport } from '../lib/db';
@@ -11,7 +11,12 @@ import { addReport, getAllReports, deleteReport } from '../lib/db';
 // Add id and createdAt to the report data for history management
 export type HistoryReportData = ReportData & { id: number; createdAt: string };
 
-export const FormCheckerPage: React.FC = () => {
+interface FormCheckerPageProps {
+  isHistoryOpen: boolean;
+  onToggleHistory: () => void;
+}
+
+export const FormCheckerPage: React.FC<FormCheckerPageProps> = ({ isHistoryOpen, onToggleHistory }) => {
   const [status, setStatus] = useState<AppStatus>('idle');
   const [file, setFile] = useState<File | null>(null);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
@@ -22,7 +27,6 @@ export const FormCheckerPage: React.FC = () => {
   const [endTime, setEndTime] = useState(5);
   const [videoDuration, setVideoDuration] = useState(0);
   const [history, setHistory] = useState<HistoryReportData[]>([]);
-  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 
 
   useEffect(() => {
@@ -288,15 +292,11 @@ You must return your response in a JSON format that adheres to the provided sche
     setReportData(null);
     setErrorMessage('');
   };
-
-  const handleToggleHistory = () => {
-    setIsHistoryOpen(prev => !prev);
-  };
   
   const handleViewHistoryItem = (report: HistoryReportData) => {
     setReportData(report);
     setStatus('report');
-    setIsHistoryOpen(false);
+    onToggleHistory();
   };
 
   const handleDeleteHistoryItem = async (id: number) => {
@@ -347,7 +347,7 @@ You must return your response in a JSON format that adheres to the provided sche
         {renderContent()}
         <HistoryPanel 
             isOpen={isHistoryOpen}
-            onClose={handleToggleHistory}
+            onClose={onToggleHistory}
             reports={history}
             onView={handleViewHistoryItem}
             onDelete={handleDeleteHistoryItem}

@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { LandingPage } from './pages/LandingPage';
 import { FormCheckerPage } from './pages/FormCheckerPage';
 import { DailyUpdatePage } from './pages/DailyUpdatePage';
@@ -11,15 +11,26 @@ export type Page = 'landing' | 'form-checker' | 'daily-update' | 'progress-book'
 
 const App: React.FC = () => {
     const [currentPage, setCurrentPage] = useState<Page>('landing');
+    const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+
+    useEffect(() => {
+        if (currentPage !== 'form-checker') {
+            setIsHistoryOpen(false);
+        }
+    }, [currentPage]);
 
     const navigate = (page: Page) => {
         setCurrentPage(page);
     };
 
+    const handleToggleHistory = () => {
+        setIsHistoryOpen(prev => !prev);
+    };
+
     const renderContent = () => {
         switch (currentPage) {
             case 'form-checker':
-                return <FormCheckerPage />;
+                return <FormCheckerPage isHistoryOpen={isHistoryOpen} onToggleHistory={handleToggleHistory} />;
             case 'daily-update':
                 return <DailyUpdatePage />;
             case 'progress-book':
@@ -35,6 +46,7 @@ const App: React.FC = () => {
             <Header
               onHomeClick={() => navigate('landing')}
               showHistoryButton={currentPage === 'form-checker'}
+              onToggleHistory={handleToggleHistory}
               showBackButton={currentPage !== 'landing'}
             />
             <main className="flex-grow flex items-center justify-center px-4 sm:px-6 md:px-8 py-4">
