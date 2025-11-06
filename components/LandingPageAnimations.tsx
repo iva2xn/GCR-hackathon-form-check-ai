@@ -2,82 +2,103 @@ import React from 'react';
 
 export const FormAnalysisAnimation: React.FC = () => {
     const chartData = [
-        { name: 'Spinal Alignment', value: 85, color: 'var(--chart-1)', radius: 55 },
-        { name: 'Joint Stability', value: 90, color: 'var(--chart-2)', radius: 45 },
-        { name: 'Range of Motion', value: 75, color: 'var(--chart-3)', radius: 35 },
-        { name: 'Tempo & Control', value: 95, color: 'var(--chart-4)', radius: 25 },
+        { name: 'Tempo', value: 100, color: 'var(--chart-5)', radius: 32 },
+        { name: 'Depth', value: 95, color: 'var(--chart-4)', radius: 42 },
+        { name: 'Stability', value: 75, color: 'var(--chart-3)', radius: 52 },
+        { name: 'Alignment', value: 80, color: 'var(--chart-2)', radius: 62 },
+        { name: 'Consistency', value: 100, color: 'var(--chart-1)', radius: 72 },
     ];
-    const totalScore = Math.round(chartData.reduce((acc, item) => acc + item.value, 0) / chartData.length);
+    const totalScore = 90;
+
+    const centerX = 80;
+    const centerY = 80;
+    const maxAngleDegrees = 240; // Max sweep for a bar at 100%
+
+    const polarToCartesian = (angleInDegrees: number, radius: number) => {
+        const angleInRadians = (angleInDegrees * Math.PI) / 180.0;
+        return {
+            x: centerX + radius * Math.cos(angleInRadians),
+            y: centerY + radius * Math.sin(angleInRadians),
+        };
+    };
+
+    const describeArc = (radius: number, startAngle: number, endAngle: number) => {
+        const start = polarToCartesian(startAngle, radius);
+        const end = polarToCartesian(endAngle, radius);
+        const largeArcFlag = Math.abs(endAngle - startAngle) <= 180 ? '0' : '1';
+        const sweepFlag = endAngle < startAngle ? '0' : '1';
+        return `M ${start.x} ${start.y} A ${radius} ${radius} 0 ${largeArcFlag} ${sweepFlag} ${end.x} ${end.y}`;
+    };
+    
+    const gridRadii = [32, 42, 52, 62, 72];
+    const numRadialLines = 12;
+    const radialLines = Array.from({ length: numRadialLines }).map((_, i) => {
+        const angle = (i / numRadialLines) * 360;
+        const outerPoint = polarToCartesian(angle, 72);
+        return { x2: outerPoint.x, y2: outerPoint.y };
+    });
 
     return (
         <div className="w-full h-40 flex flex-col items-center justify-center" aria-hidden="true">
-            <svg viewBox="0 0 120 120" className="h-32 w-32">
-                <defs>
+            <style>{`
+                @keyframes count-up { 
+                    from { opacity: 0; transform: translateY(5px) scale(0.95); } 
+                    to { opacity: 1; transform: translateY(0) scale(1); } 
+                }
+                .count-up-text { animation: count-up 1s 0.5s ease-out forwards; opacity: 0; }
+                ${chartData.map((item, index) => {
+                    const endAngle = -((item.value / 100) * maxAngleDegrees);
+                    const angleInRadians = (Math.abs(endAngle) * Math.PI) / 180.0;
+                    const arcLength = angleInRadians * item.radius;
+                    return `
+                        @keyframes draw-arc-${index} { from { stroke-dashoffset: ${arcLength}; } to { stroke-dashoffset: 0; } }
+                        .arc-path-${index} { 
+                            stroke-dasharray: ${arcLength}; 
+                            stroke-dashoffset: ${arcLength}; 
+                            animation: draw-arc-${index} 1.5s 0.2s ease-out forwards; 
+                        }
+                    `;
+                }).join('')}
+            `}</style>
+            <svg viewBox="0 0 160 160" className="h-36 w-36 -mt-2">
+                <g stroke="var(--border)" strokeWidth="0.5" opacity="0.3">
+                    {gridRadii.map(r => <circle key={`c-${r}`} cx={centerX} cy={centerY} r={r} fill="none" />)}
+                    {radialLines.map((line, i) => <line key={`l-${i}`} x1={centerX} y1={centerY} x2={line.x2} y2={line.y2} />)}
+                </g>
+
+                <g>
                     {chartData.map((item, index) => {
-                        const circumference = 2 * Math.PI * item.radius;
-                        const offset = circumference * (1 - item.value / 100);
+                        const startAngle = 0;
+                        const endAngle = -((item.value / 100) * maxAngleDegrees);
+                        const arcPath = describeArc(item.radius, startAngle, endAngle);
+                        
                         return (
-                            <style key={`anim-${index}`}>{`
-                                @keyframes progress-${index} {
-                                    from { stroke-dashoffset: ${circumference}; }
-                                    to { stroke-dashoffset: ${offset}; }
-                                }
-                                .progress-bar-${index} {
-                                    animation: progress-${index} 1.5s 0.2s ease-out forwards;
-                                }
-                            `}</style>
+                             <g key={item.name}>
+                                <path
+                                    className={`arc-path-${index}`}
+                                    d={arcPath}
+                                    fill="none"
+                                    stroke={item.color}
+                                    strokeWidth="8"
+                                    strokeLinecap="round"
+                                />
+                            </g>
                         );
                     })}
-                    <style>{`
-                        @keyframes count-up {
-                            from { opacity: 0; transform: translateY(5px); }
-                            to { opacity: 1; transform: translateY(0); }
-                        }
-                        .count-up-text {
-                            animation: count-up 1s ease-out forwards;
-                        }
-                    `}</style>
-                </defs>
+                </g>
                 
-                {/* Grid Lines */}
-                <circle cx="60" cy="60" r="25" fill="none" stroke="var(--border)" strokeWidth="0.5" />
-                <circle cx="60" cy="60" r="35" fill="none" stroke="var(--border)" strokeWidth="0.5" />
-                <circle cx="60" cy="60" r="45" fill="none" stroke="var(--border)" strokeWidth="0.5" />
-                <circle cx="60" cy="60" r="55" fill="none" stroke="var(--border)" strokeWidth="0.5" />
-
-                {/* Data Bars */}
-                {chartData.map((item, index) => {
-                     const circumference = 2 * Math.PI * item.radius;
-                     return (
-                         <circle
-                             key={item.name}
-                             className={`progress-bar-${index}`}
-                             cx="60"
-                             cy="60"
-                             r={item.radius}
-                             fill="none"
-                             stroke={item.color}
-                             strokeWidth="8"
-                             strokeLinecap="round"
-                             strokeDasharray={circumference}
-                             strokeDashoffset={circumference} /* Initial state */
-                             transform="rotate(-90 60 60)"
-                         />
-                     );
-                })}
-
-                {/* Center Text */}
-                <text x="60" y="60" textAnchor="middle" dominantBaseline="middle" className="count-up-text">
-                    <tspan x="60" dy="-0.2em" fontSize="18" fontWeight="bold" fill="var(--foreground)">{totalScore}</tspan>
-                    <tspan x="60" dy="1.2em" fontSize="8" fill="var(--muted-foreground)">Overall</tspan>
+                <text x="80" y="80" textAnchor="middle" dominantBaseline="middle" className="count-up-text">
+                    <tspan x="80" dy="-0.2em" fontSize="22" fontWeight="bold" fill="var(--foreground)">{totalScore}</tspan>
+                    <tspan x="80" dy="1.2em" fontSize="9" fill="var(--muted-foreground)">Overall</tspan>
                 </text>
             </svg>
-            <div className="text-center text-xs text-muted-foreground -mt-2">
+             <div className="text-center text-xs text-foreground -mt-2">
                 AI-powered analysis of key metrics.
             </div>
         </div>
     );
 };
+
 
 export const ProgressBookAnimation: React.FC = () => {
     return (
