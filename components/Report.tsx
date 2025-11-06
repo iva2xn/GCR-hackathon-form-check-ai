@@ -1,5 +1,3 @@
-
-
 import React from 'react';
 import type { ReportData } from '../types';
 import { AlertIcon, CheckIcon, GaugeIcon, InfoIcon, RestartIcon, TrophyIcon, ClockIcon, FormCheckIcon } from './icons';
@@ -30,15 +28,21 @@ const ReportCard: React.FC<{
 
 const ScoreBreakdownCard: React.FC<{ formRating: ReportData['formRating'] }> = ({ formRating }) => {
   const chartColors = ['var(--chart-1)', 'var(--chart-2)', 'var(--chart-3)', 'var(--chart-4)', 'var(--chart-5)'];
+  const numMetrics = formRating.detailedScores.length;
+  // Reverse a slice of the colors so the last metric (largest radius) gets the primary color (--chart-1).
+  const metricColors = [...chartColors].slice(0, numMetrics).reverse();
   const baseRadius = 42;
   const radiusIncrement = 10;
 
+  // Map scores to chart data. The first metric gets the smallest radius.
+  // The final .reverse() is to process the largest arc first for rendering.
   const chartData = formRating.detailedScores.map((item, index) => ({
     name: item.metric,
-    value: item.score, // score is 1-100
-    color: chartColors[index % chartColors.length],
+    score: item.score, // The original score for text display
+    visualValue: item.score, // Use actual score for accurate visual representation
+    color: metricColors[index],
     radius: baseRadius + (index * radiusIncrement),
-  })).reverse(); // Reverse to have first metric on the outside
+  })).reverse();
 
   const centerX = 80;
   const centerY = 80;
@@ -89,8 +93,8 @@ const ScoreBreakdownCard: React.FC<{ formRating: ReportData['formRating'] }> = (
         }
         .count-up-text { animation: count-up 1s 0.5s ease-out forwards; opacity: 0; }
         ${chartData.map((item, index) => {
-            // Add 49 to the visual score and use 149 as the max for arc calculation
-            const sweepAngle = ((item.value + 49) / 149) * maxAngleDegrees;
+            // Use actual score for arc calculation, with 100 as the max.
+            const sweepAngle = (item.visualValue / 100) * maxAngleDegrees;
             const angleInRadians = (sweepAngle * Math.PI) / 180.0;
             const arcLength = angleInRadians * item.radius;
             return `
@@ -113,8 +117,8 @@ const ScoreBreakdownCard: React.FC<{ formRating: ReportData['formRating'] }> = (
                 </g>
                 
                 {chartData.map((item, index) => {
-                    // Add 49 to the visual score and use 149 as the max for arc calculation
-                    const sweepAngle = ((item.value + 49) / 149) * maxAngleDegrees;
+                    // Use actual score for arc calculation, with 100 as the max.
+                    const sweepAngle = (item.visualValue / 100) * maxAngleDegrees;
                     const endAngle = chartStartAngle - sweepAngle;
                     const arcPath = describeArc(item.radius, chartStartAngle, endAngle);
                     
@@ -157,10 +161,10 @@ const ScoreBreakdownCard: React.FC<{ formRating: ReportData['formRating'] }> = (
             <div key={index}>
                 <div className="flex justify-between items-center mb-1.5">
                     <div className="flex items-center">
-                        <span className="w-3 h-3 rounded-full mr-3" style={{ backgroundColor: chartColors[index] }}></span>
+                        <span className="w-3 h-3 rounded-full mr-3" style={{ backgroundColor: metricColors[index] }}></span>
                         <p className="font-semibold text-foreground">{item.metric}</p>
                     </div>
-                    <p className="font-mono text-lg font-bold" style={{ color: chartColors[index] }}>
+                    <p className="font-mono text-lg font-bold" style={{ color: metricColors[index] }}>
                         {item.score}<span className="text-sm font-normal text-muted-foreground">/100</span>
                     </p>
                 </div>

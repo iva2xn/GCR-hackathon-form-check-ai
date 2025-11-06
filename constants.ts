@@ -1,4 +1,5 @@
 
+
 import type { ReportData } from './types';
 
 export const DUMMY_REPORT_DATA: ReportData = {
@@ -48,22 +49,22 @@ export const DUMMY_REPORT_DATA: ReportData = {
     detailedScores: [
       {
         metric: 'Spinal Alignment',
-        score: 6,
+        score: 60,
         justification: 'Spine is neutral at the start but shows flexion (butt wink) at the bottom of the squat.',
       },
       {
         metric: 'Joint Stability',
-        score: 8,
+        score: 80,
         justification: 'Knees track well over the feet with minimal wavering. Hips appear stable.',
       },
       {
         metric: 'Range of Motion',
-        score: 7,
+        score: 70,
         justification: 'Depth is limited by the onset of butt wink. Could be deeper with improved mobility.',
       },
       {
         metric: 'Tempo & Control',
-        score: 9,
+        score: 90,
         justification: 'The descent and ascent are smooth and well-controlled, showing good command of the weight.',
       },
     ],
