@@ -1,3 +1,5 @@
+
+
 import React, { useState, useEffect, useRef } from 'react';
 import type { Page } from '../App';
 import { FormCheckIcon, BookOpenIcon, PlusIcon, ArrowRightIcon } from '../components/icons';
@@ -159,7 +161,11 @@ export const LandingPage: React.FC<{ onNavigate: (page: Page) => void }> = ({ on
     return (
         <div className="w-full text-center animate-fade-in">
             <div className="space-y-4 max-w-4xl mx-auto">
-                <div className="bg-card rounded-xl border border-border shadow-sm p-4 sm:p-6">
+                <div className="bg-card rounded-xl border border-border shadow-sm p-4 sm:p-6 text-left">
+                    <div className="mb-4">
+                        <h3 className="text-xl font-bold text-card-foreground">My Activity</h3>
+                        <p className="text-muted-foreground text-sm mt-1">Log your daily updates to fill your activity chart.</p>
+                    </div>
                     <ContributionGraph updates={updates} />
                     <div className="mt-4 flex justify-between items-center">
                         <button
@@ -178,16 +184,11 @@ export const LandingPage: React.FC<{ onNavigate: (page: Page) => void }> = ({ on
                     </div>
                 </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="w-full bg-card rounded-xl border border-border shadow-sm p-6 flex flex-col text-left transition-all duration-300 hover:shadow-lg hover:border-primary/50">
-                        <div className="flex items-start gap-4">
-                            <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                                <FormCheckIcon className="w-7 h-7 text-primary" />
-                            </div>
-                            <div>
-                                <h3 className="text-xl font-bold text-card-foreground">Analyze Your Form</h3>
-                                <p className="text-muted-foreground text-sm mt-1">Get instant feedback on your form.</p>
-                            </div>
+                        <div>
+                            <h3 className="text-xl font-bold text-card-foreground">Analyze Your Form</h3>
+                            <p className="text-muted-foreground text-sm mt-1">Get instant feedback on your form.</p>
                         </div>
                         <div className="mt-4 flex-grow">
                             <FormAnalysisAnimation />
@@ -204,14 +205,9 @@ export const LandingPage: React.FC<{ onNavigate: (page: Page) => void }> = ({ on
                     </div>
                     
                     <div className="w-full bg-card rounded-xl border border-border shadow-sm p-6 flex flex-col text-left transition-all duration-300 hover:shadow-lg hover:border-primary/50">
-                        <div className="flex items-start gap-4">
-                            <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                                <BookOpenIcon className="w-7 h-7 text-primary" />
-                            </div>
-                            <div>
-                                <h3 className="text-xl font-bold text-card-foreground">Open Progress Book</h3>
-                                <p className="text-muted-foreground text-sm mt-1">Review your fitness journey.</p>
-                            </div>
+                        <div>
+                            <h3 className="text-xl font-bold text-card-foreground">Open Progress Book</h3>
+                            <p className="text-muted-foreground text-sm mt-1">Review your fitness journey.</p>
                         </div>
                          <div className="mt-4 flex-grow">
                             <ProgressBookAnimation />

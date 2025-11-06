@@ -120,27 +120,30 @@ export const ProgressBookAnimation: React.FC = () => {
             </div>
              <style>{`
                 @keyframes fan-out-1 {
-                    0%, 100% { transform: translate(0, 0) rotate(0deg); z-index: 10; }
-                    50% { transform: translate(-65px, 0) rotate(-20deg); z-index: 10;}
+                    0%, 20% { transform: translate(0, 0) rotate(0deg); z-index: 10; }
+                    40%, 60% { transform: translate(-65px, 0) rotate(-20deg); z-index: 10; }
+                    80%, 100% { transform: translate(0, 0) rotate(0deg); z-index: 10; }
                 }
                 .animate-pola-1 {
-                    animation: fan-out-1 3s ease-in-out infinite;
+                    animation: fan-out-1 5s ease-in-out infinite;
                 }
 
-                 @keyframes fan-out-2 {
-                    0%, 100% { transform: translate(0, 0) rotate(0deg); z-index: 20; }
-                    50% { transform: translate(0, -10px) rotate(3deg); z-index: 20;}
+                @keyframes fan-out-2 {
+                    0%, 20% { transform: translate(0, 0) rotate(0deg); z-index: 20; }
+                    40%, 60% { transform: translate(0, -10px) rotate(3deg); z-index: 20; }
+                    80%, 100% { transform: translate(0, 0) rotate(0deg); z-index: 20; }
                 }
                 .animate-pola-2 {
-                    animation: fan-out-2 3s ease-in-out infinite;
+                    animation: fan-out-2 5s ease-in-out infinite;
                 }
 
                 @keyframes fan-out-3 {
-                    0%, 100% { transform: translate(0, 0) rotate(0deg); z-index: 30; }
-                    50% { transform: translate(65px, 0) rotate(20deg); z-index: 30;}
+                    0%, 20% { transform: translate(0, 0) rotate(0deg); z-index: 30; }
+                    40%, 60% { transform: translate(65px, 0) rotate(20deg); z-index: 30; }
+                    80%, 100% { transform: translate(0, 0) rotate(0deg); z-index: 30; }
                 }
                 .animate-pola-3 {
-                    animation: fan-out-3 3s ease-in-out infinite;
+                    animation: fan-out-3 5s ease-in-out infinite;
                 }
             `}</style>
         </div>
