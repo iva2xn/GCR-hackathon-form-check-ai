@@ -1,7 +1,6 @@
 import React from 'react';
 import type { ReportData } from '../types';
-import { AlertIcon, CheckIcon, GaugeIcon, InfoIcon, RestartIcon, TrophyIcon, ClockIcon, FormCheckIcon } from './icons';
-import { AccordionItem } from './Accordion';
+import { AlertIcon, GaugeIcon, InfoIcon, RestartIcon, TrophyIcon, ClockIcon, ClipboardListIcon, LightbulbIcon, SparklesIcon } from './icons';
 
 interface ReportProps {
   data: ReportData;
@@ -67,9 +66,9 @@ const ScoreBreakdownCard: React.FC<{ formRating: ReportData['formRating'] }> = (
     
   const getRatingStyles = (level: string) => {
     switch (level) {
-      case 'Needs Improvement': return 'text-destructive';
-      case 'Good': return 'text-yellow-400';
-      case 'Excellent': return 'text-green-400';
+      case 'Needs Improvement': return 'text-chart-4';
+      case 'Good': return 'text-chart-3';
+      case 'Excellent': return 'text-chart-2';
       case 'Perfect': return 'text-primary';
       default: return 'text-muted-foreground';
     }
@@ -143,12 +142,12 @@ const ScoreBreakdownCard: React.FC<{ formRating: ReportData['formRating'] }> = (
                 })}
             </g>
             <text x="80" y="80" textAnchor="middle" dominantBaseline="middle" className="count-up-text">
-                <tspan x="80" dy="-0.2em" fontSize="28" fontWeight="bold" fill="var(--foreground)" className={ratingColor}>{formRating.formScore}</tspan>
+                <tspan x="80" dy="-0.2em" fontSize="28" fontWeight="bold" fill="var(--foreground)">{formRating.formScore}</tspan>
                 <tspan x="80" dy="1.4em" fontSize="10" fill="var(--muted-foreground)">Overall</tspan>
             </text>
         </svg>
 
-        <h3 className="text-2xl font-bold mt-2 count-up-text text-foreground">{formRating.level}</h3>
+        <h3 className={`text-2xl font-bold mt-2 count-up-text ${ratingColor}`}>{formRating.level}</h3>
         <p className="text-sm text-muted-foreground mt-2 max-w-xs text-center">{formRating.justification}</p>
       </div>
       
@@ -180,14 +179,14 @@ export const Report: React.FC<ReportProps> = ({ data, onReset }) => {
   const getFeedbackStyles = (feedbackType: 'error' | 'refinement' | 'optimization') => {
     switch (feedbackType) {
       case 'error': return {
-          text: 'text-destructive',
-          icon: <AlertIcon className="w-6 h-6 text-destructive" />,
-          findingsText: 'text-destructive'
+          text: 'text-chart-4',
+          icon: <AlertIcon className="w-6 h-6 text-chart-4" />,
+          findingsText: 'text-chart-4'
         };
       case 'refinement': return {
-          text: 'text-yellow-400',
-          icon: <InfoIcon className="w-6 h-6 text-yellow-500" />,
-          findingsText: 'text-yellow-400'
+          text: 'text-chart-3',
+          icon: <InfoIcon className="w-6 h-6 text-chart-3" />,
+          findingsText: 'text-chart-3'
         };
       case 'optimization': return {
           text: 'text-primary',
@@ -195,9 +194,9 @@ export const Report: React.FC<ReportProps> = ({ data, onReset }) => {
           findingsText: 'text-primary'
         };
       default: return {
-          text: 'text-destructive',
-          icon: <AlertIcon className="w-6 h-6 text-destructive" />,
-          findingsText: 'text-destructive'
+          text: 'text-chart-4',
+          icon: <AlertIcon className="w-6 h-6 text-chart-4" />,
+          findingsText: 'text-chart-4'
         };
     }
   };
@@ -238,7 +237,7 @@ export const Report: React.FC<ReportProps> = ({ data, onReset }) => {
                     </div>
                       <div>
                         <p className="text-sm text-muted-foreground font-medium">Analysis Confidence</p>
-                        <p className="font-mono text-lg text-green-500">{data.findings.confidence}</p>
+                        <p className="font-mono text-lg text-chart-2">{data.findings.confidence}</p>
                     </div>
                     <div className="md:col-span-2">
                         <p className="text-sm text-muted-foreground font-medium">Description</p>
@@ -257,29 +256,49 @@ export const Report: React.FC<ReportProps> = ({ data, onReset }) => {
           </ReportCard>
         </div>
         
-        {/* Accordion items group */}
-        <div className="order-3 lg:order-2 space-y-6">
-          <AccordionItem title={data.correctionPlan.title} icon={<CheckIcon className="w-6 h-6 text-green-500" />} defaultOpen>
-            <div className="space-y-6">
-              {data.correctionPlan.steps.map((step, index) => (
-                  <div key={index} className="flex items-start gap-4">
-                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center text-sm">{index + 1}</div>
-                      <div>
-                          <p className="font-semibold text-card-foreground">{step.title}</p>
-                          <p className="text-muted-foreground text-sm">{step.description}</p>
-                      </div>
-                  </div>
-              ))}
-            </div>
-          </AccordionItem>
-
-          <AccordionItem title={data.rationale.title} icon={<InfoIcon className="w-6 h-6 text-yellow-500" />}>
-              <p className="text-muted-foreground text-sm">{data.rationale.text}</p>
-          </AccordionItem>
-
-          <AccordionItem title={data.positiveReinforcement.title} icon={<FormCheckIcon className="w-6 h-6 text-primary" />}>
-              <p className="text-muted-foreground text-sm">{data.positiveReinforcement.text}</p>
-          </AccordionItem>
+        {/* Consolidated AI Feedback Card */}
+        <div className="order-3 lg:order-2">
+            <ReportCard title="AI-Coach Feedback" icon={<ClipboardListIcon className="w-6 h-6 text-primary" />}>
+                <div className="space-y-8">
+                {/* Correction Plan Stepper */}
+                <div>
+                    <h4 className="font-semibold text-lg text-card-foreground mb-4">{data.correctionPlan.title}</h4>
+                    <ol className="relative border-l border-border/50 ml-4">
+                    {data.correctionPlan.steps.map((step, index) => (
+                        <li key={index} className="mb-6 ml-8 last:mb-0">
+                        <span className="absolute flex items-center justify-center w-8 h-8 bg-secondary rounded-full -left-4 ring-4 ring-card text-sm font-bold text-secondary-foreground">
+                            {index + 1}
+                        </span>
+                        <h5 className="font-semibold text-card-foreground">{step.title}</h5>
+                        <p className="text-sm text-muted-foreground mt-1">{step.description}</p>
+                        </li>
+                    ))}
+                    </ol>
+                </div>
+                
+                {/* Key Insight */}
+                <div className="space-y-2">
+                    <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 flex items-center justify-center bg-secondary rounded-lg">
+                            <LightbulbIcon className="w-5 h-5 text-chart-3" />
+                        </div>
+                        <h4 className="text-lg font-semibold text-card-foreground">{data.rationale.title}</h4>
+                    </div>
+                    <p className="text-sm text-muted-foreground pl-11">{data.rationale.text}</p>
+                </div>
+                
+                {/* Strengths */}
+                <div className="space-y-2">
+                    <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 flex items-center justify-center bg-secondary rounded-lg">
+                            <SparklesIcon className="w-5 h-5 text-primary" />
+                        </div>
+                        <h4 className="text-lg font-semibold text-card-foreground">{data.positiveReinforcement.title}</h4>
+                    </div>
+                    <p className="text-sm text-muted-foreground pl-11">{data.positiveReinforcement.text}</p>
+                </div>
+                </div>
+            </ReportCard>
         </div>
         
         {/* Score breakdown, positioned correctly for both mobile and desktop */}

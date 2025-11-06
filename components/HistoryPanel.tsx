@@ -18,9 +18,9 @@ const HistoryCard: React.FC<{ report: HistoryReportData; onView: () => void; onD
 
     const getLevelColor = (level: string) => {
         switch (level) {
-            case 'Needs Improvement': return 'text-destructive';
-            case 'Good': return 'text-yellow-400';
-            case 'Excellent': return 'text-green-400';
+            case 'Needs Improvement': return 'text-chart-4';
+            case 'Good': return 'text-chart-3';
+            case 'Excellent': return 'text-chart-2';
             case 'Perfect': return 'text-primary';
             default: return 'text-muted-foreground';
         }
