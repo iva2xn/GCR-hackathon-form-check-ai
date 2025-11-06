@@ -28,7 +28,38 @@ const ReportCard: React.FC<{
 );
 
 
-export const Report: React.FC<ReportProps> = ({ data, onReset }) => {
+const ScoreBreakdownCard: React.FC<{ formRating: ReportData['formRating'] }> = ({ formRating }) => {
+  const chartColors = ['var(--chart-1)', 'var(--chart-2)', 'var(--chart-3)', 'var(--chart-4)', 'var(--chart-5)'];
+  const baseRadius = 42;
+  const radiusIncrement = 10;
+
+  const chartData = formRating.detailedScores.map((item, index) => ({
+    name: item.metric,
+    value: item.score, // score is 1-100
+    color: chartColors[index % chartColors.length],
+    radius: baseRadius + (index * radiusIncrement),
+  })).reverse(); // Reverse to have first metric on the outside
+
+  const centerX = 80;
+  const centerY = 80;
+  const maxAngleDegrees = 240;
+  const chartStartAngle = 0; // Starts at 3 o'clock
+
+  const polarToCartesian = (angleInDegrees: number, radius: number) => {
+    const angleInRadians = (angleInDegrees * Math.PI) / 180.0;
+    return {
+      x: centerX + radius * Math.cos(angleInRadians),
+      y: centerY + radius * Math.sin(angleInRadians),
+    };
+  };
+
+  const describeArc = (radius: number, startAngle: number, endAngle: number) => {
+    const start = polarToCartesian(startAngle, radius);
+    const end = polarToCartesian(endAngle, radius);
+    const largeArcFlag = Math.abs(endAngle - startAngle) <= 180 ? '0' : '1';
+    const sweepFlag = endAngle < startAngle ? '0' : '1'; // 0 for counter-clockwise
+    return `M ${start.x} ${start.y} A ${radius} ${radius} 0 ${largeArcFlag} ${sweepFlag} ${end.x} ${end.y}`;
+  };
     
   const getRatingStyles = (level: string) => {
     switch (level) {
@@ -39,6 +70,110 @@ export const Report: React.FC<ReportProps> = ({ data, onReset }) => {
       default: return 'text-muted-foreground';
     }
   };
+  const ratingColor = getRatingStyles(formRating.level);
+
+  const gridRadii = [42, 52, 62, 72, 85];
+  const numRadialLines = 12;
+  const radialLines = Array.from({ length: numRadialLines }).map((_, i) => {
+    const angle = (i / numRadialLines) * 360;
+    const outerPoint = polarToCartesian(angle, 82);
+    return { x2: outerPoint.x, y2: outerPoint.y };
+  });
+
+  return (
+    <ReportCard title="Score Breakdown" icon={<GaugeIcon className="w-6 h-6 text-primary" />}>
+      <style>{`
+        @keyframes count-up { 
+            from { opacity: 0; transform: translateY(5px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+        .count-up-text { animation: count-up 1s 0.5s ease-out forwards; opacity: 0; }
+        ${chartData.map((item, index) => {
+            // Add 49 to the visual score and use 149 as the max for arc calculation
+            const sweepAngle = ((item.value + 49) / 149) * maxAngleDegrees;
+            const angleInRadians = (sweepAngle * Math.PI) / 180.0;
+            const arcLength = angleInRadians * item.radius;
+            return `
+                @keyframes draw-arc-${index} { from { stroke-dashoffset: ${arcLength}; } to { stroke-dashoffset: 0; } }
+                .arc-path-${index} { 
+                    stroke-dasharray: ${arcLength}; 
+                    stroke-dashoffset: ${arcLength}; 
+                    animation: draw-arc-${index} 1.5s ${0.2 + index * 0.1}s ease-out forwards; 
+                }
+            `;
+        }).join('')}
+      `}</style>
+      
+      <div className="relative flex flex-col items-center">
+        <svg viewBox="0 0 160 160" className="w-48 h-48">
+            <g>
+                <g stroke="var(--border)" strokeWidth="0.5" opacity="0.2">
+                    {gridRadii.slice(0, chartData.length).map(r => <circle key={`c-${r}`} cx={centerX} cy={centerY} r={r} fill="none" />)}
+                    {radialLines.map((line, i) => <line key={`l-${i}`} x1={centerX} y1={centerY} x2={line.x2} y2={line.y2} />)}
+                </g>
+                
+                {chartData.map((item, index) => {
+                    // Add 49 to the visual score and use 149 as the max for arc calculation
+                    const sweepAngle = ((item.value + 49) / 149) * maxAngleDegrees;
+                    const endAngle = chartStartAngle - sweepAngle;
+                    const arcPath = describeArc(item.radius, chartStartAngle, endAngle);
+                    
+                    return (
+                        <g key={item.name}>
+                             <path
+                                d={describeArc(item.radius, chartStartAngle, chartStartAngle - maxAngleDegrees)}
+                                fill="none"
+                                stroke="var(--muted)"
+                                strokeWidth="8"
+                                strokeLinecap="round"
+                                opacity="0.1"
+                            />
+                            <path
+                                className={`arc-path-${index}`}
+                                d={arcPath}
+                                fill="none"
+                                stroke={item.color}
+                                strokeWidth="8"
+                                strokeLinecap="round"
+                            />
+                        </g>
+                    );
+                })}
+            </g>
+            <text x="80" y="80" textAnchor="middle" dominantBaseline="middle" className="count-up-text">
+                <tspan x="80" dy="-0.2em" fontSize="28" fontWeight="bold" fill="var(--foreground)" className={ratingColor}>{formRating.formScore}</tspan>
+                <tspan x="80" dy="1.4em" fontSize="10" fill="var(--muted-foreground)">Overall</tspan>
+            </text>
+        </svg>
+
+        <h3 className="text-2xl font-bold mt-2 count-up-text text-foreground">{formRating.level}</h3>
+        <p className="text-sm text-muted-foreground mt-2 max-w-xs text-center">{formRating.justification}</p>
+      </div>
+      
+      <hr className="my-6 border-border" />
+
+      <div className="space-y-5">
+        {formRating.detailedScores.map((item, index) => (
+            <div key={index}>
+                <div className="flex justify-between items-center mb-1.5">
+                    <div className="flex items-center">
+                        <span className="w-3 h-3 rounded-full mr-3" style={{ backgroundColor: chartColors[index] }}></span>
+                        <p className="font-semibold text-foreground">{item.metric}</p>
+                    </div>
+                    <p className="font-mono text-lg font-bold" style={{ color: chartColors[index] }}>
+                        {item.score}<span className="text-sm font-normal text-muted-foreground">/100</span>
+                    </p>
+                </div>
+                <p className="text-muted-foreground text-xs pl-6">{item.justification}</p>
+            </div>
+        ))}
+      </div>
+    </ReportCard>
+  );
+};
+
+
+export const Report: React.FC<ReportProps> = ({ data, onReset }) => {
     
   const getFeedbackStyles = (feedbackType: 'error' | 'refinement' | 'optimization') => {
     switch (feedbackType) {
@@ -65,13 +200,7 @@ export const Report: React.FC<ReportProps> = ({ data, onReset }) => {
     }
   };
 
-  const ratingColor = getRatingStyles(data.formRating.level);
   const feedbackStyles = getFeedbackStyles(data.error.feedbackType);
-  
-  const circleRadius = 74;
-  const circleStrokeWidth = 12;
-  const strokeDasharray = 2 * Math.PI * circleRadius;
-  const strokeDashoffset = strokeDasharray * (1 - data.formRating.formScore / 100);
 
   return (
     <div className="w-full mx-auto animate-fade-in">
@@ -86,10 +215,9 @@ export const Report: React.FC<ReportProps> = ({ data, onReset }) => {
             </button>
         </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 mt-6 lg:items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 mt-6 lg:items-start">
         
-        {/* Main Analysis Content (Spans 2 columns on desktop) */}
-        <div className="lg:col-span-2 order-1 space-y-6">
+        <div className="order-1 space-y-6">
             <ReportCard title={data.error.title} icon={feedbackStyles.icon}>
               <div className="space-y-4">
                   <div className="relative rounded-lg overflow-hidden border border-border bg-black flex justify-center items-center mb-4">
@@ -124,36 +252,10 @@ export const Report: React.FC<ReportProps> = ({ data, onReset }) => {
                   </div>
               </div>
             </ReportCard>
-            
-            <ReportCard title="Overall Score" icon={<GaugeIcon className="w-6 h-6 text-primary" />}>
-                <div className="flex flex-col items-center text-center">
-                    <div className="relative">
-                        <svg className="w-40 h-40 transform -rotate-90" viewBox="0 0 160 160">
-                            <circle cx="80" cy="80" r={circleRadius} stroke="currentColor" strokeWidth={circleStrokeWidth} fill="transparent" className="text-muted opacity-10" />
-                            <circle
-                                cx="80"
-                                cy="80"
-                                r={circleRadius}
-                                stroke="currentColor"
-                                strokeWidth={circleStrokeWidth}
-                                fill="transparent"
-                                strokeDasharray={strokeDasharray}
-                                strokeDashoffset={strokeDashoffset}
-                                strokeLinecap="round"
-                                className={`${ratingColor} transition-all duration-1000 ease-out`}
-                            />
-                        </svg>
-                        <div className="absolute inset-0 flex items-center justify-center">
-                            <span className={`text-5xl font-bold ${ratingColor}`}>{data.formRating.formScore}</span>
-                        </div>
-                    </div>
-                    <h2 className={`text-3xl font-bold mt-4 ${ratingColor}`}>
-                        {data.formRating.level}
-                    </h2>
-                    <p className="text-sm text-muted-foreground mt-2 max-w-md">{data.formRating.justification}</p>
-                </div>
-            </ReportCard>
+            <ScoreBreakdownCard formRating={data.formRating} />
+        </div>
 
+        <div className="order-2 space-y-6">
             <AccordionItem title={data.correctionPlan.title} icon={<CheckIcon className="w-6 h-6 text-green-500" />} defaultOpen>
               <div className="space-y-6">
                 {data.correctionPlan.steps.map((step, index) => (
@@ -175,26 +277,6 @@ export const Report: React.FC<ReportProps> = ({ data, onReset }) => {
             <AccordionItem title={data.positiveReinforcement.title} icon={<FormCheckIcon className="w-6 h-6 text-primary" />}>
                 <p className="text-muted-foreground text-sm">{data.positiveReinforcement.text}</p>
             </AccordionItem>
-        </div>
-
-        {/* Sidebar Content (1 column on desktop) */}
-        <div className="lg:col-span-1 order-2 space-y-6">
-            <ReportCard title="Detailed Breakdown" icon={<GaugeIcon className="w-6 h-6 text-primary" />}>
-                 <div className="space-y-5">
-                    {data.formRating.detailedScores.map((item, index) => (
-                        <div key={index}>
-                            <div className="flex justify-between items-center mb-1">
-                                <p className="font-semibold text-foreground">{item.metric}</p>
-                                <p className="font-mono text-lg font-bold text-primary">{item.score}<span className="text-sm font-normal text-muted-foreground">/10</span></p>
-                            </div>
-                            <div className="w-full bg-muted rounded-full h-2.5">
-                                <div className="bg-primary h-2.5 rounded-full" style={{ width: `${item.score * 10}%`, transition: 'width 1s ease-out' }}></div>
-                            </div>
-                            <p className="text-muted-foreground text-xs mt-1.5">{item.justification}</p>
-                        </div>
-                    ))}
-                </div>
-            </ReportCard>
         </div>
 
       </div>

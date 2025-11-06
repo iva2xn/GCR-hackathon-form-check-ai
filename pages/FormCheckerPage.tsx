@@ -157,7 +157,7 @@ Analyze this sequence of video frames of a user performing an exercise. Your tas
 3. Identify the single best aspect of the user's form that they should continue doing.
 4. Provide a detailed analysis and a step-by-step correction or refinement plan for the main point of feedback.
 5. Select the single frame from the sequence (index 0 to ${NUM_FRAMES - 1}) that best illustrates your main feedback point and specify its index.
-6. Provide a detailed performance breakdown. For each of the following metrics, provide a score from 0 to 10 (where 10 is perfect) and a brief justification. Be realistic, constructive, and fair in your scoring. A score of 9-10 should represent excellent, safe, and effective execution, even if it's not "textbook perfect" due to individual body mechanics. Acknowledge that perfect form can look different on different people.
+6. Provide a detailed performance breakdown. For each of the following metrics, provide a score from 1 to 25 (where 25 is perfect) and a brief justification. Be realistic, constructive, and fair in your scoring. A score of 22-25 should represent excellent, safe, and effective execution, even if it's not "textbook perfect" due to individual body mechanics. Acknowledge that perfect form can look different on different people.
     - Spinal Alignment: Assess the neutrality of the spine throughout the movement, allowing for natural curves.
     - Joint Stability: Assess the stability of key joints like knees, hips, and shoulders.
     - Range of Motion: Assess if the depth and movement range are appropriate and safe for the exercise and the individual's likely mobility.
@@ -212,6 +212,16 @@ You must return your response in a JSON format that adheres to the provided sche
         throw new Error("The AI returned a response with an invalid format.");
       }
       
+      // Scale detailed scores from 1-25 range to 1-100 range
+      if (report.formRating && report.formRating.detailedScores) {
+        report.formRating.detailedScores = report.formRating.detailedScores.map((detail: ScoreDetail) => {
+          const aiScore = detail.score; // This is 1-25
+          const clampedAiScore = Math.max(1, Math.min(25, aiScore));
+          const scaledScore = Math.round(((clampedAiScore - 1) / (25 - 1)) * (100 - 1) + 1);
+          return { ...detail, score: scaledScore };
+        });
+      }
+
       if (!report || !report.error || !report.error.feedbackType || !report.formRating || !report.formRating.detailedScores || report.formRating.detailedScores.length === 0) {
         throw new Error("The AI returned an incomplete report. Please try again.");
       }
@@ -239,10 +249,12 @@ You must return your response in a JSON format that adheres to the provided sche
         if (score < 90) return 'Excellent';
         return 'Perfect';
       };
-
-      const totalScore = report.formRating.detailedScores.reduce((sum: number, item: ScoreDetail) => sum + item.score, 0);
+      
+      const totalScore = report.formRating.detailedScores.reduce((sum: number, item: ScoreDetail) => {
+          return sum + item.score;
+      }, 0);
       const averageScore = totalScore / report.formRating.detailedScores.length;
-      report.formRating.formScore = Math.round(averageScore * 10);
+      report.formRating.formScore = Math.round(averageScore);
       report.formRating.level = getLevelFromScore(report.formRating.formScore);
       
       const finalReport = report as ReportData;
@@ -417,7 +429,7 @@ const reportDataSchema = {
             type: Type.OBJECT,
             properties: {
               metric: { type: Type.STRING, description: "The name of the performance metric being evaluated (e.g., 'Spinal Alignment')." },
-              score: { type: Type.INTEGER, description: "A score from 0 to 10 for this specific metric." },
+              score: { type: Type.INTEGER, description: "A score from 1 to 25 for this specific metric, where 1 is the lowest and 25 is the highest." },
               justification: { type: Type.STRING, description: "A brief justification for the score given to this metric." }
             },
             required: ['metric', 'score', 'justification']
