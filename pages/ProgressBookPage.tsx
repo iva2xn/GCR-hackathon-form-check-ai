@@ -94,7 +94,7 @@ export const ProgressBookPage: React.FC<ProgressBookPageProps> = ({ isHistoryOpe
     }, []);
 
     const handleViewUpdate = (update: DailyUpdate) => {
-        if (!update.id) return;
+        if (typeof update.id !== 'number') return;
         const updateIndex = updates.findIndex(u => u.id === update.id);
         if (updateIndex !== -1 && bookRef.current) {
             // Page numbering: 0=cover, 1=update1_left, 2=update1_right, etc.
@@ -105,7 +105,6 @@ export const ProgressBookPage: React.FC<ProgressBookPageProps> = ({ isHistoryOpe
     };
 
     const handleDeleteUpdate = async (id: number) => {
-        if (!id) return;
         await deleteDailyUpdate(id);
         setUpdates(prev => prev.filter(update => update.id !== id));
     };

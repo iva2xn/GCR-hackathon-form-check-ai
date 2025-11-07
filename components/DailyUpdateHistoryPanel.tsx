@@ -38,6 +38,17 @@ const UpdateHistoryCard: React.FC<{ update: DailyUpdate; onView: () => void; onD
 
 export const DailyUpdateHistoryPanel: React.FC<DailyUpdateHistoryPanelProps> = ({ isOpen, onClose, updates, onView, onDelete }) => {
     
+  const handleDelete = (e: React.MouseEvent, id: number | undefined) => {
+    e.stopPropagation();
+    if (typeof id !== 'number') {
+        console.error("Delete failed: update ID is missing or invalid.");
+        return;
+    }
+    if (window.confirm('Are you sure you want to delete this daily update? This action cannot be undone.')) {
+        onDelete(id);
+    }
+  };
+
   return (
     <>
       <div 
@@ -58,17 +69,12 @@ export const DailyUpdateHistoryPanel: React.FC<DailyUpdateHistoryPanelProps> = (
                 {updates.length > 0 ? (
                     <div className="space-y-4">
                         {updates.map(update => (
-                           <UpdateHistoryCard 
+                            <UpdateHistoryCard 
                                 key={update.id}
                                 update={update}
                                 onView={() => onView(update)}
-                                onDelete={(e) => {
-                                    e.stopPropagation();
-                                    if (update.id && window.confirm('Are you sure you want to delete this daily update? This action cannot be undone.')) {
-                                        onDelete(update.id);
-                                    }
-                                }}
-                           />
+                                onDelete={(e) => handleDelete(e, update.id)}
+                            />
                         ))}
                     </div>
                 ) : (
