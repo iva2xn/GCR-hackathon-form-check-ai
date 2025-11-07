@@ -145,7 +145,7 @@ export const ProgressBookPage: React.FC<ProgressBookPageProps> = ({ isHistoryOpe
 
     return (
         <>
-            <div ref={containerRef} className="w-full flex justify-center items-center animate-fade-in" style={{ minHeight: `${bookSize.height}px` }}>
+            <div ref={containerRef} className="w-full flex justify-center items-center animate-fade-in relative" style={{ minHeight: `${bookSize.height}px` }}>
                 <AnyHTMLFlipBook
                     ref={bookRef}
                     width={bookSize.width} 

@@ -1,4 +1,5 @@
 
+
 import React from 'react';
 import { FormCheckIcon, HistoryIcon, ArrowLeftIcon } from './icons';
 
@@ -7,9 +8,18 @@ interface HeaderProps {
     showHistoryButton?: boolean;
     onToggleHistory?: () => void;
     showBackButton?: boolean;
+    showAddUpdateButton?: boolean;
+    onAddUpdateClick?: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ onHomeClick, showHistoryButton = false, onToggleHistory, showBackButton = false }) => {
+export const Header: React.FC<HeaderProps> = ({ 
+  onHomeClick, 
+  showHistoryButton = false, 
+  onToggleHistory, 
+  showBackButton = false,
+  showAddUpdateButton = false,
+  onAddUpdateClick
+}) => {
   
   const Logo = () => (
     <div className="flex items-center">
@@ -43,14 +53,27 @@ export const Header: React.FC<HeaderProps> = ({ onHomeClick, showHistoryButton =
                 )}
             </div>
 
-            {showHistoryButton && onToggleHistory && (
-                <button
-                    onClick={onToggleHistory}
-                    className="p-2 rounded-full text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
-                    aria-label="View analysis history"
-                >
-                    <HistoryIcon className="w-6 h-6" />
-                </button>
+            {(showHistoryButton || showAddUpdateButton) && (
+              <div className="flex items-center gap-2 sm:gap-4">
+                {showAddUpdateButton && onAddUpdateClick && (
+                  <button
+                      onClick={onAddUpdateClick}
+                      className="px-4 py-1.5 text-sm font-semibold text-primary-foreground bg-primary rounded-md hover:bg-primary/90 transition-colors shadow-sm"
+                      aria-label="Add daily update"
+                  >
+                     Add Update
+                  </button>
+                )}
+                {showHistoryButton && onToggleHistory && (
+                    <button
+                        onClick={onToggleHistory}
+                        className="p-2 rounded-full text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
+                        aria-label="View analysis history"
+                    >
+                        <HistoryIcon className="w-6 h-6" />
+                    </button>
+                )}
+              </div>
             )}
         </div>
       </div>

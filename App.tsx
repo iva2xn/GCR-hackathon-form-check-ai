@@ -41,6 +41,10 @@ const App: React.FC = () => {
     const handleToggleUpdateHistory = () => {
         setIsUpdateHistoryOpen(prev => !prev);
     };
+    
+    const handleAddUpdateClick = () => {
+        navigate('daily-update');
+    };
 
     const renderContent = () => {
         switch (currentPage) {
@@ -63,6 +67,8 @@ const App: React.FC = () => {
               showHistoryButton={currentPage === 'form-checker' || currentPage === 'progress-book'}
               onToggleHistory={currentPage === 'form-checker' ? handleToggleHistory : handleToggleUpdateHistory}
               showBackButton={currentPage !== 'landing'}
+              showAddUpdateButton={currentPage === 'progress-book'}
+              onAddUpdateClick={handleAddUpdateClick}
             />
             <main className="flex-grow flex items-center justify-center px-4 sm:px-6 md:px-8 py-4">
                 <div className="w-full max-w-7xl">
