@@ -70,3 +70,8 @@ export const getAllDailyUpdates = async (): Promise<DailyUpdate[]> => {
     const db = await initDB();
     return db.getAll(UPDATES_STORE_NAME);
 };
+
+export const deleteDailyUpdate = async (id: number) => {
+  const db = await initDB();
+  return db.delete(UPDATES_STORE_NAME, id);
+};

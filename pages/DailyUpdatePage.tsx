@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { CameraIcon, CheckIcon } from '../components/icons';
 import { addDailyUpdate } from '../lib/db';
+import type { DailyUpdate } from '../types';
 
 const fileToBase64 = (file: File): Promise<string> => {
   return new Promise((resolve, reject) => {
@@ -14,6 +15,7 @@ const fileToBase64 = (file: File): Promise<string> => {
 export const DailyUpdatePage: React.FC = () => {
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [imageUrl, setImageUrl] = useState<string | null>(null);
+    const [date, setDate] = useState<string>(new Date().toISOString().split('T')[0]);
     const [weight, setWeight] = useState<string>('');
     const [title, setTitle] = useState<string>('');
     const [description, setDescription] = useState<string>('');
@@ -82,6 +84,7 @@ export const DailyUpdatePage: React.FC = () => {
     const resetForm = () => {
         setImageFile(null);
         setImageUrl(null);
+        setDate(new Date().toISOString().split('T')[0]);
         setWeight('');
         setTitle('');
         setDescription('');
@@ -93,8 +96,8 @@ export const DailyUpdatePage: React.FC = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!imageFile || !weight || !title || !description) {
-            setError('All fields are required.');
+        if (!imageFile || !title || !description || !date) {
+            setError('Photo, date, title, and description are required.');
             return;
         }
 
@@ -104,13 +107,18 @@ export const DailyUpdatePage: React.FC = () => {
 
         try {
             const imageBase64 = await fileToBase64(imageFile);
-            const newUpdate = {
-                date: new Date().toISOString(),
+            
+            const newUpdate: Omit<DailyUpdate, 'id'> = {
+                date: new Date(date + 'T00:00:00').toISOString(),
                 imageBase64,
-                weight: parseFloat(weight),
                 title,
                 description,
             };
+
+            if (weight) {
+                newUpdate.weight = parseFloat(weight);
+            }
+
             await addDailyUpdate(newUpdate);
             
             setIsSuccess(true);
@@ -127,7 +135,7 @@ export const DailyUpdatePage: React.FC = () => {
         }
     };
 
-    const isFormValid = imageFile && weight && title && description && !isSubmitting;
+    const isFormValid = imageFile && date && title && description && !isSubmitting;
 
     return (
         <div className="w-full max-w-2xl mx-auto animate-fade-in">
@@ -169,9 +177,21 @@ export const DailyUpdatePage: React.FC = () => {
                         />
                     </div>
 
+                     <div>
+                        <label htmlFor="date" className="block text-sm font-medium text-foreground mb-2">Date of Update</label>
+                        <input
+                            id="date"
+                            type="date"
+                            value={date}
+                            onChange={(e) => setDate(e.target.value)}
+                            className="w-full px-4 py-2 bg-input border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                            required
+                        />
+                    </div>
+
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                          <div>
-                            <label htmlFor="weight" className="block text-sm font-medium text-foreground mb-2">Weight (kg/lbs)</label>
+                            <label htmlFor="weight" className="block text-sm font-medium text-foreground mb-2">Weight (kg/lbs) <span className="text-muted-foreground text-xs">(Optional)</span></label>
                             <input
                                 id="weight"
                                 type="number"
@@ -180,7 +200,6 @@ export const DailyUpdatePage: React.FC = () => {
                                 onChange={(e) => setWeight(e.target.value)}
                                 placeholder="e.g., 75.5"
                                 className="w-full px-4 py-2 bg-input border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
-                                required
                             />
                         </div>
                         <div>

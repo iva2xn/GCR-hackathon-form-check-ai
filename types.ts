@@ -48,7 +48,7 @@ export interface DailyUpdate {
     id?: number;
     date: string;
     imageBase64: string;
-    weight: number;
+    weight?: number;
     title: string;
     description: string;
 }

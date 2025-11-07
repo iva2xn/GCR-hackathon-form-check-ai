@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef, forwardRef } from 'react';
 import HTMLFlipBook from 'react-pageflip';
-import { getAllDailyUpdates } from '../lib/db';
+import { getAllDailyUpdates, deleteDailyUpdate } from '../lib/db';
 import type { DailyUpdate } from '../types';
-// FIX: Removed unused 'CloudIcon' import as it is not an exported member of the icons module.
-import { BookOpenIcon } from '../components/icons';
+import { BookJournalIcon, PlusIcon } from '../components/icons';
+import { DailyUpdateHistoryPanel } from '../components/DailyUpdateHistoryPanel';
+import type { Page as AppPage } from '../App';
 
 const PageCover = forwardRef<HTMLDivElement, { children: React.ReactNode, position: 'front' | 'back' }>(({ children, position }, ref) => {
     const radiusClasses = position === 'front' ? 'rounded-tr-[0.375rem] rounded-br-[0.375rem]' : 'rounded-tl-[0.375rem] rounded-bl-[0.375rem]';
@@ -40,10 +41,17 @@ const Page = forwardRef<HTMLDivElement, { children: React.ReactNode, number: num
     );
 });
 
-export const ProgressBookPage: React.FC = () => {
+interface ProgressBookPageProps {
+  isHistoryOpen: boolean;
+  onToggleHistory: () => void;
+  onNavigate: (page: AppPage) => void;
+}
+
+export const ProgressBookPage: React.FC<ProgressBookPageProps> = ({ isHistoryOpen, onToggleHistory, onNavigate }) => {
     const [updates, setUpdates] = useState<DailyUpdate[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const containerRef = useRef<HTMLDivElement>(null);
+    const bookRef = useRef<any>(null);
     const [bookSize, setBookSize] = useState({ width: 350, height: 500 });
 
     useEffect(() => {
@@ -51,7 +59,7 @@ export const ProgressBookPage: React.FC = () => {
             try {
                 const allUpdates = await getAllDailyUpdates();
                 const sortedUpdates = allUpdates.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-                setUpdates(sortedUpdates.slice(-15));
+                setUpdates(sortedUpdates);
             } catch (error) {
                 console.error("Failed to load progress updates:", error);
             } finally {
@@ -85,6 +93,23 @@ export const ProgressBookPage: React.FC = () => {
         };
     }, []);
 
+    const handleViewUpdate = (update: DailyUpdate) => {
+        if (!update.id) return;
+        const updateIndex = updates.findIndex(u => u.id === update.id);
+        if (updateIndex !== -1 && bookRef.current) {
+            // Page numbering: 0=cover, 1=update1_left, 2=update1_right, etc.
+            const pageNumber = updateIndex * 2 + 1;
+            bookRef.current.pageFlip().turnToPage(pageNumber);
+            onToggleHistory(); // Close panel after flipping
+        }
+    };
+
+    const handleDeleteUpdate = async (id: number) => {
+        if (!id) return;
+        await deleteDailyUpdate(id);
+        setUpdates(prev => prev.filter(update => update.id !== id));
+    };
+
     if (isLoading) {
         return (
             <div className="flex flex-col items-center justify-center text-center p-8">
@@ -97,75 +122,96 @@ export const ProgressBookPage: React.FC = () => {
     if (updates.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center text-center p-8 bg-card rounded-xl shadow">
-                <BookOpenIcon className="w-16 h-16 text-muted-foreground mb-4" />
+                <BookJournalIcon className="w-16 h-16 text-muted-foreground mb-4" />
                 <h2 className="text-2xl font-bold text-card-foreground">Your Progress Book is Empty</h2>
                 <p className="text-muted-foreground mt-2 max-w-sm">
                     Start by logging your daily progress. Each entry you create will become a new page in this journal.
                 </p>
+                 <button
+                    onClick={() => onNavigate('daily-update')}
+                    className="mt-6 inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-bold text-primary-foreground bg-primary rounded-md shadow-sm transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
+                >
+                    <PlusIcon className="w-4 h-4" />
+                    <span>Log Your First Update</span>
+                </button>
             </div>
         );
     }
     
-    // FIX: The react-pageflip library has incorrect TypeScript definitions, marking optional props as required.
+    // The react-pageflip library has incorrect TypeScript definitions, marking optional props as required.
     // Casting to `any` to bypass the type checking for this component and avoid compilation errors.
     const AnyHTMLFlipBook = HTMLFlipBook as any;
 
-    return (
-        <div ref={containerRef} className="w-full flex justify-center items-center animate-fade-in" style={{ minHeight: `${bookSize.height}px` }}>
-            <AnyHTMLFlipBook
-                width={bookSize.width} 
-                height={bookSize.height}
-                size="fixed"
-                showCover={true}
-                className="shadow-2xl"
-                flippingTime={600}
-            >
-                <PageCover position="front">
-                    <h1 className="text-3xl font-bold font-serif">My Progress Book</h1>
-                    <p className="text-sm opacity-80">A journey of a thousand miles begins with a single step.</p>
-                </PageCover>
+    const sortedUpdatesForPanel = [...updates].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
-                {updates.flatMap((update, index) => [
-                    <Page key={`${update.id}-left`} number={index * 2 + 1}>
-                       <div className="h-full w-full flex flex-col items-center justify-between pt-8 px-8 pb-8">
-                            <div className="transform -rotate-2 hover:rotate-1 transition-transform duration-300 ease-in-out w-full max-w-[280px] mx-auto">
-                                <div className="bg-white p-3 rounded-sm shadow-lg">
-                                    <div className="aspect-[3/4] bg-gray-100">
-                                        <img 
-                                            src={update.imageBase64} 
-                                            alt={`Progress on ${new Date(update.date).toLocaleDateString()}`} 
-                                            className="w-full h-full object-cover border border-gray-200"
-                                        />
+    return (
+        <>
+            <div ref={containerRef} className="w-full flex justify-center items-center animate-fade-in" style={{ minHeight: `${bookSize.height}px` }}>
+                <AnyHTMLFlipBook
+                    ref={bookRef}
+                    width={bookSize.width} 
+                    height={bookSize.height}
+                    size="fixed"
+                    showCover={true}
+                    className="shadow-2xl"
+                    flippingTime={600}
+                >
+                    <PageCover position="front">
+                        <h1 className="text-3xl font-bold font-serif">My Progress Book</h1>
+                        <p className="text-sm opacity-80">A journey of a thousand miles begins with a single step.</p>
+                    </PageCover>
+
+                    {updates.flatMap((update, index) => [
+                        <Page key={`${update.id}-left`} number={index * 2 + 1}>
+                           <div className="h-full w-full flex flex-col items-center justify-between pt-8 px-8 pb-8">
+                                <div className="transform -rotate-2 hover:rotate-1 transition-transform duration-300 ease-in-out w-full max-w-[280px] mx-auto">
+                                    <div className="bg-white p-3 rounded-sm shadow-lg">
+                                        <div className="aspect-[3/4] bg-gray-100">
+                                            <img 
+                                                src={update.imageBase64} 
+                                                alt={`Progress on ${new Date(update.date).toLocaleDateString()}`} 
+                                                className="w-full h-full object-cover border border-gray-200"
+                                            />
+                                        </div>
+                                        <p className="w-full text-left font-digital text-lg text-gray-500 mt-2 px-1">
+                                            {new Date(update.date).toLocaleDateString('en-US', {
+                                                year: '2-digit', month: '2-digit', day: '2-digit' 
+                                            })}
+                                        </p>
                                     </div>
-                                    <p className="w-full text-left font-digital text-lg text-gray-500 mt-2 px-1">
-                                        {new Date(update.date).toLocaleDateString('en-US', {
-                                            year: '2-digit', month: '2-digit', day: '2-digit' 
-                                        })}
-                                    </p>
                                 </div>
+                                
+                                <div className="font-doodle text-2xl text-gray-800 transform -rotate-1 text-center">
+                                    {typeof update.weight === 'number' && (
+                                        <p className="font-bold" style={{ lineHeight: '60px' }}>Weight: {update.weight} kg/lbs</p>
+                                    )}
+                                </div>
+                           </div>
+                        </Page>,
+                        <Page key={`${update.id}-right`} number={index * 2 + 2}>
+                            <div className="h-full w-full flex flex-col font-doodle text-gray-800" style={{ padding: '45px 32px 32px 32px' }}>
+                                <h2 className="text-3xl font-bold" style={{ lineHeight: '60px' }}>
+                                    {update.title}
+                                </h2>
+                                <p className="text-xl whitespace-pre-wrap flex-grow" style={{ lineHeight: '30px' }}>
+                                    {update.description}
+                                </p>
                             </div>
-                            
-                            <div className="font-doodle text-2xl text-gray-800 transform -rotate-1 text-center">
-                                <p className="font-bold" style={{ lineHeight: '60px' }}>Weight: {update.weight} kg/lbs</p>
-                            </div>
-                       </div>
-                    </Page>,
-                    <Page key={`${update.id}-right`} number={index * 2 + 2}>
-                        <div className="h-full w-full flex flex-col font-doodle text-gray-800" style={{ padding: '45px 32px 32px 32px' }}>
-                            <h2 className="text-3xl font-bold" style={{ lineHeight: '60px' }}>
-                                {update.title}
-                            </h2>
-                            <p className="text-xl whitespace-pre-wrap flex-grow" style={{ lineHeight: '30px' }}>
-                                {update.description}
-                            </p>
-                        </div>
-                    </Page>
-                ])}
-                
-                <PageCover position="back">
-                    <h2 className="text-2xl font-bold font-serif">To Be Continued...</h2>
-                </PageCover>
-            </AnyHTMLFlipBook>
-        </div>
+                        </Page>
+                    ])}
+                    
+                    <PageCover position="back">
+                        <h2 className="text-2xl font-bold font-serif">To Be Continued...</h2>
+                    </PageCover>
+                </AnyHTMLFlipBook>
+            </div>
+            <DailyUpdateHistoryPanel
+                isOpen={isHistoryOpen}
+                onClose={onToggleHistory}
+                updates={sortedUpdatesForPanel}
+                onView={handleViewUpdate}
+                onDelete={handleDeleteUpdate}
+            />
+        </>
     );
 };

@@ -1,8 +1,9 @@
 
 
+
 import React, { useState, useEffect, useRef } from 'react';
 import type { Page } from '../App';
-import { FormCheckIcon, BookOpenIcon, PlusIcon, ArrowRightIcon } from '../components/icons';
+import { FormCheckIcon, BookOpenIcon, PlusIcon, ArrowRightIcon, HistoryIcon } from '../components/icons';
 import { getAllDailyUpdates } from '../lib/db';
 import type { DailyUpdate } from '../types';
 import { FormAnalysisAnimation, ProgressBookAnimation } from '../components/LandingPageAnimations';
@@ -147,7 +148,7 @@ const ContributionGraph: React.FC<{ updates: DailyUpdate[] }> = ({ updates }) =>
 
 
 // The new LandingPage, acting as a dashboard
-export const LandingPage: React.FC<{ onNavigate: (page: Page) => void }> = ({ onNavigate }) => {
+export const LandingPage: React.FC<{ onNavigate: (page: Page, options?: { openHistory?: boolean; openUpdateHistory?: boolean }) => void }> = ({ onNavigate }) => {
     const [updates, setUpdates] = useState<DailyUpdate[]>([]);
     
     useEffect(() => {
@@ -193,13 +194,20 @@ export const LandingPage: React.FC<{ onNavigate: (page: Page) => void }> = ({ on
                         <div className="mt-4 flex-grow">
                             <FormAnalysisAnimation />
                         </div>
-                        <div className="mt-6">
+                        <div className="mt-6 flex items-center justify-center gap-4">
                             <button
                                 onClick={() => onNavigate('form-checker')}
                                 className="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-bold text-primary-foreground bg-primary rounded-md shadow-sm transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
                             >
                                 <span>Analyze Form</span>
                                 <ArrowRightIcon className="w-4 h-4" />
+                            </button>
+                            <button
+                                onClick={() => onNavigate('form-checker', { openHistory: true })}
+                                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-bold text-secondary-foreground bg-secondary rounded-md shadow-sm transition-colors hover:bg-secondary/80 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
+                            >
+                                <HistoryIcon className="w-4 h-4" />
+                                <span>Check History</span>
                             </button>
                         </div>
                     </div>
@@ -212,13 +220,20 @@ export const LandingPage: React.FC<{ onNavigate: (page: Page) => void }> = ({ on
                          <div className="mt-4 flex-grow">
                             <ProgressBookAnimation />
                         </div>
-                        <div className="mt-6">
+                        <div className="mt-6 flex items-center justify-center gap-4">
                             <button
                                 onClick={() => onNavigate('progress-book')}
                                 className="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-bold text-primary-foreground bg-primary rounded-md shadow-sm transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
                             >
                                 <span>Open Book</span>
                                 <ArrowRightIcon className="w-4 h-4" />
+                            </button>
+                            <button
+                                onClick={() => onNavigate('progress-book', { openUpdateHistory: true })}
+                                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-bold text-secondary-foreground bg-secondary rounded-md shadow-sm transition-colors hover:bg-secondary/80 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
+                            >
+                                <HistoryIcon className="w-4 h-4" />
+                                <span>View Pages</span>
                             </button>
                         </div>
                     </div>
