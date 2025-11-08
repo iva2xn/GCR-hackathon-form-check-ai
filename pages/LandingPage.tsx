@@ -1,6 +1,3 @@
-
-
-
 import React, { useState, useEffect, useRef } from 'react';
 import type { Page } from '../App';
 import { FormCheckIcon, BookOpenIcon, PlusIcon, ArrowRightIcon, HistoryIcon } from '../components/icons';
@@ -164,7 +161,7 @@ export const LandingPage: React.FC<{ onNavigate: (page: Page, options?: { openHi
             <div className="space-y-4 max-w-4xl mx-auto">
                 <div className="bg-card rounded-xl border border-border shadow-sm p-4 sm:p-6 text-left">
                     <div className="mb-4">
-                        <h3 className="text-xl font-bold text-card-foreground">My Activity</h3>
+                        <h3 className="text-xl font-bold text-card-foreground">My Fitness Activity</h3>
                         <p className="text-muted-foreground text-sm mt-1">Log your daily updates to fill your activity chart.</p>
                     </div>
                     <ContributionGraph updates={updates} />
