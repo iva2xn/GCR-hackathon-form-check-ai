@@ -75,3 +75,17 @@ export const deleteDailyUpdate = async (id: number) => {
   const db = await initDB();
   return db.delete(UPDATES_STORE_NAME, id);
 };
+
+export const clearDailyUpdates = async () => {
+  const db = await initDB();
+  return db.clear(UPDATES_STORE_NAME);
+};
+
+export const bulkAddDailyUpdates = async (updates: DailyUpdate[]) => {
+  const db = await initDB();
+  const tx = db.transaction(UPDATES_STORE_NAME, 'readwrite');
+  await Promise.all(updates.map(update => {
+    return tx.store.put(update);
+  }));
+  return tx.done;
+};

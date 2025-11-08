@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, forwardRef } from 'react';
 import HTMLFlipBook from 'react-pageflip';
-import { getAllDailyUpdates, deleteDailyUpdate } from '../lib/db';
+import { getAllDailyUpdates, deleteDailyUpdate, clearDailyUpdates, bulkAddDailyUpdates } from '../lib/db';
 import type { DailyUpdate } from '../types';
 import { BookJournalIcon, PlusIcon } from '../components/icons';
 import { DailyUpdateHistoryPanel } from '../components/DailyUpdateHistoryPanel';
@@ -50,6 +50,7 @@ interface ProgressBookPageProps {
 export const ProgressBookPage: React.FC<ProgressBookPageProps> = ({ isHistoryOpen, onToggleHistory, onNavigate }) => {
     const [updates, setUpdates] = useState<DailyUpdate[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [isImporting, setIsImporting] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
     const bookRef = useRef<any>(null);
     const [bookSize, setBookSize] = useState({ width: 350, height: 500 });
@@ -92,6 +93,76 @@ export const ProgressBookPage: React.FC<ProgressBookPageProps> = ({ isHistoryOpe
             clearTimeout(timer);
         };
     }, []);
+    
+    const handleExport = () => {
+        if (updates.length === 0) {
+            alert("There is no progress to export.");
+            return;
+        }
+        try {
+            const dataStr = JSON.stringify(updates, null, 2);
+            const blob = new Blob([dataStr], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = "fittrack-progress-book.json";
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error("Failed to export progress:", error);
+            alert("An error occurred while exporting your data.");
+        }
+    };
+
+    const handleImport = (file: File) => {
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            const text = e.target?.result;
+            if (typeof text !== 'string') {
+                alert("Could not read the selected file.");
+                return;
+            }
+
+            try {
+                const importedData: unknown = JSON.parse(text);
+                
+                if (!Array.isArray(importedData) || !importedData.every(item => 
+                    typeof item === 'object' && item !== null &&
+                    'date' in item && 'imageBase64' in item && 'title' in item && 'description' in item
+                )) {
+                    throw new Error("Invalid file format. Please upload a valid progress book JSON file.");
+                }
+
+                if (window.confirm("Are you sure you want to import this file? This will replace all your current progress data.")) {
+                    setIsImporting(true);
+                    await clearDailyUpdates();
+                    await bulkAddDailyUpdates(importedData as DailyUpdate[]);
+                    
+                    const allUpdates = await getAllDailyUpdates();
+                    const sortedUpdates = allUpdates.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+                    setUpdates(sortedUpdates);
+
+                    if (bookRef.current && sortedUpdates.length > 0) {
+                        bookRef.current.pageFlip().turnToPage(0);
+                    }
+                    
+                    alert("Progress imported successfully!");
+                }
+            } catch (error) {
+                console.error("Failed to import progress:", error);
+                alert(error instanceof Error ? error.message : "An error occurred during import.");
+            } finally {
+                setIsImporting(false);
+            }
+        };
+        reader.onerror = () => {
+            alert("Error reading the file.");
+            setIsImporting(false);
+        };
+        reader.readAsText(file);
+    };
 
     const handleViewUpdate = (update: DailyUpdate) => {
         if (typeof update.id !== 'number') return;
@@ -118,7 +189,7 @@ export const ProgressBookPage: React.FC<ProgressBookPageProps> = ({ isHistoryOpe
         );
     }
 
-    if (updates.length === 0) {
+    if (updates.length === 0 && !isImporting) {
         return (
             <div className="flex flex-col items-center justify-center text-center p-8 bg-card rounded-xl shadow">
                 <BookJournalIcon className="w-16 h-16 text-muted-foreground mb-4" />
@@ -210,6 +281,9 @@ export const ProgressBookPage: React.FC<ProgressBookPageProps> = ({ isHistoryOpe
                 updates={sortedUpdatesForPanel}
                 onView={handleViewUpdate}
                 onDelete={handleDeleteUpdate}
+                onImport={handleImport}
+                onExport={handleExport}
+                isImporting={isImporting}
             />
         </>
     );
