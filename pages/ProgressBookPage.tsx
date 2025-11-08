@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, forwardRef } from 'react';
 import HTMLFlipBook from 'react-pageflip';
 import { getAllDailyUpdates, deleteDailyUpdate, clearDailyUpdates, bulkAddDailyUpdates } from '../lib/db';
 import type { DailyUpdate } from '../types';
-import { BookJournalIcon, PlusIcon } from '../components/icons';
+import { BookJournalIcon, PlusIcon, UploadIcon } from '../components/icons';
 import { DailyUpdateHistoryPanel } from '../components/DailyUpdateHistoryPanel';
 import type { Page as AppPage } from '../App';
 
@@ -53,6 +53,7 @@ export const ProgressBookPage: React.FC<ProgressBookPageProps> = ({ isHistoryOpe
     const [isImporting, setIsImporting] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
     const bookRef = useRef<any>(null);
+    const importInputRef = useRef<HTMLInputElement>(null);
     const [bookSize, setBookSize] = useState({ width: 350, height: 500 });
 
     useEffect(() => {
@@ -105,7 +106,7 @@ export const ProgressBookPage: React.FC<ProgressBookPageProps> = ({ isHistoryOpe
             const url = URL.createObjectURL(blob);
             const link = document.createElement("a");
             link.href = url;
-            link.download = "fittrack-progress-book.json";
+            link.download = "cloudfitness-progress-book.json";
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -164,6 +165,20 @@ export const ProgressBookPage: React.FC<ProgressBookPageProps> = ({ isHistoryOpe
         reader.readAsText(file);
     };
 
+    const handleImportClick = () => {
+        importInputRef.current?.click();
+    };
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            handleImport(file);
+            if (importInputRef.current) {
+                importInputRef.current.value = '';
+            }
+        }
+    };
+
     const handleViewUpdate = (update: DailyUpdate) => {
         if (typeof update.id !== 'number') return;
         const updateIndex = updates.findIndex(u => u.id === update.id);
@@ -195,15 +210,31 @@ export const ProgressBookPage: React.FC<ProgressBookPageProps> = ({ isHistoryOpe
                 <BookJournalIcon className="w-16 h-16 text-muted-foreground mb-4" />
                 <h2 className="text-2xl font-bold text-card-foreground">Your Progress Book is Empty</h2>
                 <p className="text-muted-foreground mt-2 max-w-sm">
-                    Start by logging your daily progress. Each entry you create will become a new page in this journal.
+                    Start by logging your daily progress or import your existing data.
                 </p>
-                 <button
-                    onClick={() => onNavigate('daily-update')}
-                    className="mt-6 inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-bold text-primary-foreground bg-primary rounded-md shadow-sm transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
-                >
-                    <PlusIcon className="w-4 h-4" />
-                    <span>Log Your First Update</span>
-                </button>
+                <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-4">
+                    <button
+                        onClick={() => onNavigate('daily-update')}
+                        className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-bold text-primary-foreground bg-primary rounded-md shadow-sm transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
+                    >
+                        <PlusIcon className="w-4 h-4" />
+                        <span>Log Your First Update</span>
+                    </button>
+                    <button
+                        onClick={handleImportClick}
+                        className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-bold text-secondary-foreground bg-secondary rounded-md shadow-sm transition-colors hover:bg-secondary/80 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
+                    >
+                        <UploadIcon className="w-4 h-4" />
+                        <span>Import Data</span>
+                    </button>
+                </div>
+                <input
+                    type="file"
+                    accept=".json"
+                    ref={importInputRef}
+                    onChange={handleFileChange}
+                    className="hidden"
+                />
             </div>
         );
     }

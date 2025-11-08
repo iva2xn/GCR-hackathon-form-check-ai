@@ -2,12 +2,12 @@ import { openDB, DBSchema, IDBPDatabase } from 'idb';
 import type { HistoryReportData } from '../pages/FormCheckerPage';
 import type { DailyUpdate } from '../types';
 
-const DB_NAME = 'FitTrackDB';
+const DB_NAME = 'CloudfitnessDB';
 const DB_VERSION = 3; 
 const REPORTS_STORE_NAME = 'reports';
 const UPDATES_STORE_NAME = 'dailyUpdates';
 
-interface FitTrackDB extends DBSchema {
+interface CloudfitnessDB extends DBSchema {
   [REPORTS_STORE_NAME]: {
     key: number;
     value: HistoryReportData;
@@ -18,13 +18,13 @@ interface FitTrackDB extends DBSchema {
   };
 }
 
-let dbPromise: Promise<IDBPDatabase<FitTrackDB>> | null = null;
+let dbPromise: Promise<IDBPDatabase<CloudfitnessDB>> | null = null;
 
 const initDB = () => {
   if (dbPromise) {
     return dbPromise;
   }
-  dbPromise = openDB<FitTrackDB>(DB_NAME, DB_VERSION, {
+  dbPromise = openDB<CloudfitnessDB>(DB_NAME, DB_VERSION, {
     upgrade(db, oldVersion) {
       // This is a major upgrade that fixes persistence issues.
       // To ensure a clean state, we are recreating the object stores.
@@ -85,7 +85,10 @@ export const bulkAddDailyUpdates = async (updates: DailyUpdate[]) => {
   const db = await initDB();
   const tx = db.transaction(UPDATES_STORE_NAME, 'readwrite');
   await Promise.all(updates.map(update => {
-    return tx.store.put(update);
+    // FIX: Remove the id from the imported update to allow IndexedDB to auto-generate a new one.
+    // This prevents primary key conflicts and makes the import process more robust.
+    const { id, ...updateData } = update;
+    return tx.store.put(updateData);
   }));
   return tx.done;
 };

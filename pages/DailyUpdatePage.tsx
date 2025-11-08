@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { CameraIcon, CheckIcon } from '../components/icons';
+import { CameraIcon } from '../components/icons';
 import { addDailyUpdate } from '../lib/db';
 import type { DailyUpdate } from '../types';
 
@@ -20,7 +20,6 @@ export const DailyUpdatePage: React.FC = () => {
     const [title, setTitle] = useState<string>('');
     const [description, setDescription] = useState<string>('');
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-    const [isSuccess, setIsSuccess] = useState<boolean>(false);
     const [error, setError] = useState<string>('');
     const [isDragging, setIsDragging] = useState(false);
 
@@ -103,7 +102,6 @@ export const DailyUpdatePage: React.FC = () => {
 
         setIsSubmitting(true);
         setError('');
-        setIsSuccess(false);
 
         try {
             const imageBase64 = await fileToBase64(imageFile);
@@ -120,12 +118,7 @@ export const DailyUpdatePage: React.FC = () => {
             }
 
             await addDailyUpdate(newUpdate);
-            
-            setIsSuccess(true);
-            setTimeout(() => {
-                setIsSuccess(false);
-                resetForm();
-            }, 3000);
+            resetForm();
 
         } catch (err) {
             console.error("Failed to save daily update:", err);
@@ -236,7 +229,7 @@ export const DailyUpdatePage: React.FC = () => {
                             disabled={!isFormValid}
                             className="w-full inline-flex items-center justify-center px-8 py-3 text-lg font-bold text-primary-foreground bg-primary rounded-md shadow-sm transition-colors enabled:hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
                         >
-                            {isSubmitting ? 'Submitting...' : isSuccess ? <><CheckIcon className="w-6 h-6 mr-2" /> Submitted!</> : 'Submit Daily Update'}
+                            {isSubmitting ? 'Submitting...' : 'Submit Daily Update'}
                         </button>
                     </div>
                 </form>
