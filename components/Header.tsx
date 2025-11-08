@@ -1,7 +1,8 @@
 
 
+
 import React from 'react';
-import { FormCheckIcon, HistoryIcon, ArrowLeftIcon } from './icons';
+import { CloudIcon, HistoryIcon, ArrowLeftIcon } from './icons';
 
 interface HeaderProps {
     onHomeClick: () => void;
@@ -24,9 +25,9 @@ export const Header: React.FC<HeaderProps> = ({
   const Logo = () => (
     <div className="flex items-center">
         <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center mr-3 shadow-md">
-            <FormCheckIcon className="w-7 h-7 text-primary-foreground" />
+            <CloudIcon className="w-7 h-7 text-primary-foreground" />
         </div>
-        <h1 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight">Cloudfitness</h1>
+        <h1 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight">CloudFitness</h1>
     </div>
   );
   
