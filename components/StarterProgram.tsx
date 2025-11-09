@@ -1,5 +1,6 @@
 
 
+
 import React, { useState, useEffect, useMemo } from 'react';
 import ReactDOM from 'react-dom';
 import { GoogleGenAI, Type } from "@google/genai";
@@ -72,7 +73,7 @@ const starterPlanSchema = {
 };
 
 
-export const StarterProgram: React.FC<{ streak: number }> = ({ streak }) => {
+export const StarterProgram: React.FC<{ totalUpdates: number }> = ({ totalUpdates }) => {
     const [planInfo, setPlanInfo] = useState<PlanInfo | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [formStep, setFormStep] = useState(0); // 0: goal, 1: details, 2: lifestyle
@@ -327,31 +328,44 @@ export const StarterProgram: React.FC<{ streak: number }> = ({ streak }) => {
         <>
             {planInfo ? (
                 <div className="bg-card rounded-xl border border-border shadow-sm p-4 sm:p-6 text-left animate-fade-in">
-                    <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-4">
-                        <div>
-                            <h3 className="text-xl font-bold text-card-foreground">Your Daily Dashboard</h3>
-                            <p className="text-muted-foreground text-sm mt-1">Here's your focus for today. Stay consistent!</p>
-                        </div>
-                        <div className="text-xs sm:text-sm font-medium text-muted-foreground bg-secondary px-3 py-1.5 rounded-md mt-2 sm:mt-0 self-start sm:self-center">
-                            {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
-                        </div>
+                    <div className="sm:mb-4">
+                        <h3 className="text-xl font-bold text-card-foreground">Your Daily Dashboard</h3>
+                        <p className="text-muted-foreground text-sm mt-1">Here's your focus for today. Stay consistent!</p>
                     </div>
-                    <div className="mt-4 grid grid-cols-1 sm:grid-cols-5 gap-4">
-                        <div className="sm:col-span-1 bg-secondary p-4 rounded-lg flex flex-col items-center justify-center text-center">
-                            <StreakIcon className="w-8 h-8 text-destructive mb-2" />
-                            <p className="text-2xl font-bold text-secondary-foreground">{streak}</p>
-                            <p className="text-xs text-muted-foreground">Day Streak</p>
-                        </div>
-                        
-                        <div className="sm:col-span-3 bg-card border border-border p-4 sm:p-6 rounded-lg flex flex-col items-center justify-center text-center">
-                            <p className="text-xs text-muted-foreground font-bold uppercase tracking-wider mb-2">Today's Focus</p>
+                    <div className="mt-4 flex flex-col sm:grid sm:grid-cols-5 gap-4">
+                        <div className="order-1 sm:order-2 sm:col-span-3 bg-card border border-border p-4 sm:p-6 rounded-lg flex flex-col items-center justify-center text-center">
+                            <div className="w-full flex justify-between items-center mb-2">
+                                <p className="text-xs text-muted-foreground font-bold uppercase tracking-wider">Today's Focus</p>
+                                <p className="text-xs font-mono text-muted-foreground">
+                                    {new Date().toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' })}
+                                </p>
+                            </div>
                             <p className="text-xl sm:text-2xl font-bold text-card-foreground truncate max-w-full">{getTodaysWorkout()}</p>
                         </div>
                         
-                        <div className="sm:col-span-1 bg-secondary p-4 rounded-lg flex flex-col items-center justify-center text-center">
+                        <div className="order-2 sm:order-1 sm:col-span-1 bg-secondary p-4 rounded-lg flex-col items-center justify-center text-center hidden sm:flex">
+                            <CalendarIcon className="w-8 h-8 text-primary mb-2" />
+                            <p className="text-2xl font-bold text-secondary-foreground">{totalUpdates}</p>
+                            <p className="text-xs text-muted-foreground">Gym Days</p>
+                        </div>
+
+                        <div className="order-3 sm:order-3 sm:col-span-1 bg-secondary p-4 rounded-lg flex-col items-center justify-center text-center hidden sm:flex">
                             <TargetIcon className="w-8 h-8 text-primary mb-2" />
                             <p className="text-2xl font-bold text-secondary-foreground">{planInfo.plan.nutrition.proteinGrams}g</p>
                             <p className="text-xs text-muted-foreground">Protein Goal</p>
+                        </div>
+
+                        <div className="order-2 grid grid-cols-2 gap-4 sm:hidden">
+                            <div className="bg-secondary p-4 rounded-lg flex flex-col items-center justify-center text-center">
+                                <CalendarIcon className="w-8 h-8 text-primary mb-2" />
+                                <p className="text-2xl font-bold text-secondary-foreground">{totalUpdates}</p>
+                                <p className="text-xs text-muted-foreground">Gym Days</p>
+                            </div>
+                            <div className="bg-secondary p-4 rounded-lg flex flex-col items-center justify-center text-center">
+                                <TargetIcon className="w-8 h-8 text-primary mb-2" />
+                                <p className="text-2xl font-bold text-secondary-foreground">{planInfo.plan.nutrition.proteinGrams}g</p>
+                                <p className="text-xs text-muted-foreground">Protein Goal</p>
+                            </div>
                         </div>
                     </div>
                 </div>

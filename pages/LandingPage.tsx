@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect, useRef } from 'react';
 import type { Page } from '../App';
 import { FormCheckIcon, BookOpenIcon, PlusIcon, ArrowRightIcon, HistoryIcon } from '../components/icons';
@@ -145,45 +146,20 @@ const ContributionGraph: React.FC<{ updates: DailyUpdate[] }> = ({ updates }) =>
     );
 }
 
-const calculateStreak = (updates: DailyUpdate[]): number => {
-    if (updates.length === 0) return 0;
-
-    const toYMD = (d: Date) => d.toISOString().split('T')[0];
-    const activityDates = new Set(updates.map(u => toYMD(new Date(u.date))));
-    
-    let streak = 0;
-    const today = new Date();
-    const yesterday = new Date();
-    yesterday.setDate(today.getDate() - 1);
-
-    let currentDate = new Date();
-
-    if (!activityDates.has(toYMD(today)) && !activityDates.has(toYMD(yesterday))) {
-        return 0;
-    }
-    
-    if (!activityDates.has(toYMD(today))) {
-        currentDate.setDate(currentDate.getDate() - 1);
-    }
-
-    while (activityDates.has(toYMD(currentDate))) {
-        streak++;
-        currentDate.setDate(currentDate.getDate() - 1);
-    }
-
-    return streak;
+const calculateTotalUpdates = (updates: DailyUpdate[]): number => {
+    return updates.length;
 };
 
 // The new LandingPage, acting as a dashboard
 export const LandingPage: React.FC<{ onNavigate: (page: Page, options?: { openHistory?: boolean; openUpdateHistory?: boolean }) => void }> = ({ onNavigate }) => {
     const [updates, setUpdates] = useState<DailyUpdate[]>([]);
-    const [streak, setStreak] = useState(0);
+    const [totalUpdates, setTotalUpdates] = useState(0);
     
     useEffect(() => {
         const fetchUpdates = async () => {
             const allUpdates = await getAllDailyUpdates();
             setUpdates(allUpdates);
-            setStreak(calculateStreak(allUpdates));
+            setTotalUpdates(calculateTotalUpdates(allUpdates));
         };
         fetchUpdates();
     }, []);
@@ -191,7 +167,7 @@ export const LandingPage: React.FC<{ onNavigate: (page: Page, options?: { openHi
     return (
         <div className="w-full text-center">
             <div className="space-y-4 max-w-4xl mx-auto">
-                <StarterProgram streak={streak} />
+                <StarterProgram totalUpdates={totalUpdates} />
                 <div className="bg-card rounded-xl border border-border shadow-sm p-4 sm:p-6 text-left animate-fade-in" style={{ animationDelay: '50ms' }}>
                     <div className="mb-4">
                         <h3 className="text-xl font-bold text-card-foreground">My Fitness Activity</h3>
