@@ -64,3 +64,37 @@ export interface SkeletonData {
   connections: [string, string][];
   highlightedConnections: [string, string][];
 }
+
+
+// ADD: New types for the Starter Program feature
+export interface StarterFormData {
+  goal: 'Lose Weight' | 'Build Muscle' | 'Improve Endurance' | null;
+  gender: 'male' | 'female' | 'other' | null;
+  age: string;
+  height: string;
+  weight: string;
+  activityLevel: 'sedentary' | 'light' | 'moderate' | 'active' | null;
+  workoutDays: string;
+  equipment: 'bodyweight' | 'home-gym' | 'full-gym' | null;
+}
+
+export interface StarterPlan {
+  planTitle: string;
+  summary: string;
+  nutrition: {
+    dailyCalories: number;
+    proteinGrams: number;
+    carbsGrams: number;
+    fatGrams: number;
+    explanation: string;
+  };
+  workoutPlan: {
+    weeklySplit: {
+      day: string;
+      exercises: string[];
+      notes: string;
+    }[];
+  };
+  lifestyleTips: string[];
+  disclaimer: string;
+}
