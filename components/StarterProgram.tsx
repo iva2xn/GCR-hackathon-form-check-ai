@@ -131,7 +131,7 @@ export const StarterProgram: React.FC<{ streak: number }> = ({ streak }) => {
         setStatus('loading');
         setErrorMessage('');
         try {
-            const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_API_KEY });
+            const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
             const prompt = `You are an expert personal trainer and certified nutritionist. Create a personalized, actionable, and encouraging fitness and nutrition starter plan based on this data. Be realistic and prioritize safety for a beginner.
             
             User Data:
