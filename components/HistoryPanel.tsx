@@ -1,6 +1,5 @@
 
 import React from 'react';
-// FIX: Corrected import path for HistoryReportData. It is defined in FormCheckerPage.tsx.
 import type { HistoryReportData } from '../pages/FormCheckerPage';
 import { TrashIcon, CloseIcon } from './icons';
 

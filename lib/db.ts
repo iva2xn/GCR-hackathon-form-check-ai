@@ -85,8 +85,6 @@ export const bulkAddDailyUpdates = async (updates: DailyUpdate[]) => {
   const db = await initDB();
   const tx = db.transaction(UPDATES_STORE_NAME, 'readwrite');
   await Promise.all(updates.map(update => {
-    // FIX: Remove the id from the imported update to allow IndexedDB to auto-generate a new one.
-    // This prevents primary key conflicts and makes the import process more robust.
     const { id, ...updateData } = update;
     return tx.store.put(updateData);
   }));

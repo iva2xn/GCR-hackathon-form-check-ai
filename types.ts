@@ -53,7 +53,6 @@ export interface DailyUpdate {
     description: string;
 }
 
-// FIX: Add missing Point and SkeletonData types for SkeletonOverlay component.
 export interface Point {
   x: number;
   y: number;
@@ -65,8 +64,6 @@ export interface SkeletonData {
   highlightedConnections: [string, string][];
 }
 
-
-// ADD: New types for the Starter Program feature
 export interface StarterFormData {
   goal: 'Lose Weight' | 'Build Muscle' | 'Improve Endurance' | null;
   gender: 'male' | 'female' | 'other' | null;

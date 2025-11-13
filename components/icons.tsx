@@ -44,7 +44,6 @@ export const ClockIcon: React.FC<{ className?: string }> = ({ className }) => (
   </svg>
 );
 
-// FIX: Resolved redeclaration error by using a single, simplified definition for TrophyIcon.
 export const TrophyIcon: React.FC<{ className?: string }> = ({ className }) => (
     <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 18.75h-9a9.75 9.75 0 01-9-9.393V5.625a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 5.625v3.732a9.75 9.75 0 01-9 9.393zM9 18.75v2.25a1.5 1.5 0 001.5 1.5h3a1.5 1.5 0 001.5-1.5v-2.25" />
@@ -188,7 +187,6 @@ export const CloudIcon: React.FC<{ className?: string }> = ({ className }) => (
   </svg>
 );
 
-// ADD: Icons for the new starter program feature
 export const ScaleIcon: React.FC<{ className?: string }> = ({ className }) => (
     <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
       <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v17.25m0 0c-1.472 0-2.882.265-4.185.75M12 20.25c1.472 0 2.882.265 4.185.75M18.75 4.97A48.416 48.416 0 0012 4.5c-2.291 0-4.545.16-6.75.47m13.5 0c1.01.143 2.01.317 3 .52m-3-.52l2.62 10.726c.122.499-.106 1.028-.589 1.202a5.988 5.988 0 01-2.153.24c-1.119 0-2.233-.254-3.285-.745M5.25 4.97c-1.01.143-2.01.317-3 .52m3-.52L2.62 15.696c-.122.499.106 1.028.589 1.202a5.989 5.989 0 002.153.24c1.119 0 2.233-.254 3.285-.745" />
